@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 class PDKManagerApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PDK Manager")
+        self.setWindowTitle("OpenROAD GUI")
         self.setGeometry(100, 100, 600, 500)
         self.initUI()
         self.current_file = None
