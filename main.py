@@ -172,14 +172,18 @@ class PDKManagerApp(QWidget):
     
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
-        file_path = f"designs/{selected_pdk}/{self.imported_design}/{file_name}"
-        if os.path.exists(file_path):
-            self.current_file = file_path
-            
-            with open(file_path, "r") as file:
-                self.text_edit.setText(file.read())
-            self.text_edit.setVisible(True)
-            self.save_button.setVisible(True)
+
+        if self.imported_design and selected_pdk:
+            file_path = f"designs/{selected_pdk}/{self.imported_design}/{file_name}"
+            if os.path.exists(file_path):
+                self.current_file = file_path
+                
+                with open(file_path, "r") as file:
+                    self.text_edit.setText(file.read())
+                self.text_edit.setVisible(True)
+                self.save_button.setVisible(True)
+        else:
+            self.log("SELECT DESIGN AND PDK FIRST")
     
     def save_file(self):
         if self.current_file:
@@ -193,27 +197,33 @@ class PDKManagerApp(QWidget):
         selected_pdk = self.pdk_dropdown.currentText()
         # shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
 
-        with open("defaultConfig.txt", "r") as file:
-                makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
-                with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
-                    file.write(makefile_data)
+        if self.imported_design and selected_pdk:
+            with open("defaultConfig.txt", "r") as file:
+                    makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
+                    with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
+                        file.write(makefile_data)
 
-        if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
-            self.edit_file("config.mk")
-        self.log("Reset config.mk")
+            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
+                self.edit_file("config.mk")
+            self.log("Reset config.mk")
+        else:
+            self.log("SELECT DESIGN AND PDK FIRST")
     
     def reset_constraints(self):
         selected_pdk = self.pdk_dropdown.currentText()
         # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
 
-        with open("defaultConstraints.txt", "r") as file:
-                makefile_data = file.read().replace("gcd",self.imported_design)
-                with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
-                    file.write(makefile_data)
+        if self.imported_design and selected_pdk:
+            with open("defaultConstraints.txt", "r") as file:
+                    makefile_data = file.read().replace("gcd",self.imported_design)
+                    with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
+                        file.write(makefile_data)
 
-        if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
-            self.edit_file("constraints.sdc")
-        self.log("Reset constraints.sdc")
+            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
+                self.edit_file("constraints.sdc")
+            self.log("Reset constraints.sdc")
+        else:
+            self.log("SELECT DESIGN AND PDK FIRST")
     
     def set_makefile(self):
         if self.imported_design:
@@ -226,8 +236,12 @@ class PDKManagerApp(QWidget):
             self.log("No design has been imported yet.")
     
     def run_make(self):
-        subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
-        self.log("Running make...")
+        if self.is_ubuntu():
+            subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
+            self.log("Running make...")
+        else:
+            self.log("NOT UBUNTU")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
