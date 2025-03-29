@@ -1,4 +1,4 @@
-# OpenROAD Flow GUI Interface
+# OpenROAD GUI Interface For Ubuntu
 
 This repository provides a graphical user interface (GUI) for the OpenROAD flow, designed to streamline and simplify the use of the OpenROAD tools in an intuitive manner. It is intended to be run in an Ubuntu environment and uses **PyQt6** for the GUI.
 
