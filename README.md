@@ -26,7 +26,7 @@ Before using this GUI, ensure the following dependencies are installed:
 
 1. Clone this repository to your local machine:
    ```bash
-   git clone https://github.com/your-username/OpenROAD-GUI.git
+   git clone https://github.com/BattusaiKuroKame/OpenROAD_GUI.git
    cd OpenROAD-GUI
    ```
 
