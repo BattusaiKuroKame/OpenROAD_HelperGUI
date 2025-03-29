@@ -24,7 +24,7 @@ Before using this GUI, ensure the following dependencies are installed:
 
 ## Installation
 
-1. Clone this repository to your local machine:
+1. Clone this repository to your local machine in the "OpenROAD-flow-scripts/flow" Directory:
    ```bash
    git clone https://github.com/BattusaiKuroKame/OpenROAD_GUI.git
    cd OpenROAD-GUI
