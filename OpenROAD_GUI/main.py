@@ -63,13 +63,13 @@ class PDKManagerApp(QWidget):
         config_layout.addWidget(self.reset_config_button)
         buttons_layout.addLayout(config_layout)
         
-        # Edit constraints.sdk & Reset constraints.sdk (Same Row)
+        # Edit constraints.sdc & Reset constraints.sdc (Same Row)
         constraints_layout = QHBoxLayout()
-        self.edit_constraints_button = QPushButton("Edit constraints.sdk")
-        self.edit_constraints_button.clicked.connect(lambda: self.edit_file("constraints.sdk"))
+        self.edit_constraints_button = QPushButton("Edit constraints.sdc")
+        self.edit_constraints_button.clicked.connect(lambda: self.edit_file("constraints.sdc"))
         constraints_layout.addWidget(self.edit_constraints_button)
         
-        self.reset_constraints_button = QPushButton("Reset constraints.sdk")
+        self.reset_constraints_button = QPushButton("Reset constraints.sdc")
         self.reset_constraints_button.clicked.connect(self.reset_constraints)
         constraints_layout.addWidget(self.reset_constraints_button)
         buttons_layout.addLayout(constraints_layout)
@@ -122,9 +122,11 @@ class PDKManagerApp(QWidget):
             self.log(f"Failed to source .env file: {result.stderr}")
     
     def populate_pdk_dropdown(self):
-        pdk_path = "platforms"
+        pdk_path = "designs"
         if os.path.exists(pdk_path):
-            self.pdk_dropdown.addItems(os.listdir(pdk_path))
+            items = [item for item in os.listdir(pdk_path) if item != 'src']
+            self.pdk_dropdown.addItems(items)
+            # self.pdk_dropdown.addItems(os.listdir(pdk_path))
     
     def pdk_changed(self, text):
         self.log(f"Selected PDK: {text}")
@@ -136,18 +138,18 @@ class PDKManagerApp(QWidget):
             self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
             selected_pdk = self.pdk_dropdown.currentText()
             dest_src = f"designs/src/{self.imported_design}"
-            dest_pdk = f"platforms/{selected_pdk}/{self.imported_design}"
+            dest_pdk = f"designs/{selected_pdk}/{self.imported_design}"
             
             shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
             shutil.copytree(design_folder, dest_pdk, dirs_exist_ok=True)
             
-            shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdk")
+            shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
             shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
             self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
     
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
-        file_path = f"platforms/{selected_pdk}/{file_name}"
+        file_path = f"designs/{selected_pdk}/{file_name}"
         if os.path.exists(file_path):
             self.current_file = file_path
             with open(file_path, "r") as file:
@@ -165,22 +167,22 @@ class PDKManagerApp(QWidget):
     
     def reset_config(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConfig.txt", f"platforms/{selected_pdk}/config.mk")
+        shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/config.mk")
         if self.current_file == f"platforms/{selected_pdk}/config.mk":
             self.edit_file("config.mk")
         self.log("Reset config.mk")
     
     def reset_constraints(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConstraints.txt", f"platforms/{selected_pdk}/constraints.sdk")
-        if self.current_file == f"platforms/{selected_pdk}/constraints.sdk":
-            self.edit_file("constraints.sdk")
-        self.log("Reset constraints.sdk")
+        shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/constraints.sdc")
+        if self.current_file == f"platforms/{selected_pdk}/constraints.sdc":
+            self.edit_file("constraints.sdc")
+        self.log("Reset constraints.sdc")
     
     def set_makefile(self):
         if self.imported_design:
             with open("defaultMakefile.txt", "r") as file:
-                makefile_data = file.read().replace("nandgate", self.imported_design)
+                makefile_data = file.read().replace("DESIGN_CONFIG ?= ./designs/nangate45/gcd/config.mk", "DESIGN_CONFIG ?= ./designs/"+self.pdk_dropdown.currentText()+"/"+self.imported_design+"/config.mk")
             with open("Makefile", "w") as file:
                 file.write(makefile_data)
             self.log("Makefile updated")
