@@ -115,7 +115,7 @@ class PDKManagerApp(QWidget):
 
         #Ubuntu
         # Run the 'source .env' command in a new bash process and execute additional commands if necessary
-        result = subprocess.run(["bash", "-i", "-c", "source .env && echo 'Env sourced'"], capture_output=True, text=True)
+        result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
         if result.returncode == 0:
             self.log(f"Sourced .env file successfully: {result.stdout}")
         else:
