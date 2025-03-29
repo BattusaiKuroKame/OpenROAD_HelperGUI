@@ -176,14 +176,14 @@ class PDKManagerApp(QWidget):
     def reset_config(self):
         selected_pdk = self.pdk_dropdown.currentText()
         shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
-        if self.current_file == f"designs/{selected_pdk}/config.mk":
+        if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
             self.edit_file("config.mk")
         self.log("Reset config.mk")
     
     def reset_constraints(self):
         selected_pdk = self.pdk_dropdown.currentText()
         shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
-        if self.current_file == f"designs/{selected_pdk}/constraints.sdc":
+        if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
             self.edit_file("constraints.sdc")
         self.log("Reset constraints.sdc")
     
