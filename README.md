@@ -41,12 +41,12 @@ Before using this GUI, ensure the following dependencies are installed:
 
 1. Navigate to the repository folder:
    ```bash
-   cd OpenROAD-GUI
+   cd OpenROAD_GUI
    ```
 
 2. Launch the GUI:
    ```bash
-   python3 openroad_gui.py
+   python3 main.py
    ```
 
 3. Once the GUI is open, you can:
