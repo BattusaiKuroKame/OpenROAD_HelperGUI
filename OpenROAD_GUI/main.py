@@ -42,6 +42,11 @@ class PDKManagerApp(QWidget):
         pdk_layout.addWidget(self.pdk_label)
         pdk_layout.addWidget(self.pdk_dropdown)
         buttons_layout.addLayout(pdk_layout)
+
+        # Source .env
+        self.sourceEnv_label = QPushButton("Source Env")
+        self.sourceEnv_label.clicked.connect(self.source_env)
+        buttons_layout.addWidget(self.sourceEnv_label)
         
         # Imported Design Label
         self.imported_design_label = QLabel("Imported Design: None")
@@ -146,6 +151,8 @@ class PDKManagerApp(QWidget):
             shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
             shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
             self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
+
+            # self.source_env()
     
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
