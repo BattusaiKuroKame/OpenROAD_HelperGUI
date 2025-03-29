@@ -9,6 +9,14 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 class PDKManagerApp(QWidget):
+
+    def is_ubuntu(self):
+        try:
+            with open("/etc/os-release") as f:
+                return any("ubuntu" in line.lower() for line in f)
+        except FileNotFoundError:
+            return False
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("OpenROAD GUI")
@@ -120,11 +128,16 @@ class PDKManagerApp(QWidget):
 
         #Ubuntu
         # Run the 'source .env' command in a new bash process and execute additional commands if necessary
-        result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
-        if result.returncode == 0:
-            self.log(f"Sourced .env file successfully: {result.stdout}")
+
+        if self.is_ubuntu():
+
+            result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
+            if result.returncode == 0:
+                self.log(f"Sourced .env file successfully: {result.stdout}")
+            else:
+                self.log(f"Failed to source .env file: {result.stderr}")
         else:
-            self.log(f"Failed to source .env file: {result.stderr}")
+            self.log("NOT UBUNTU")
     
     def populate_pdk_dropdown(self):
         pdk_path = "designs"
