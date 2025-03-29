@@ -17,6 +17,7 @@ Before using this GUI, ensure the following dependencies are installed:
 1. **Ubuntu 20.04 or later**.
 2. **OpenROAD flow tools**. You can install OpenROAD from the [official repository](https://github.com/The-OpenROAD-Project/OpenROAD).
 3. **Python 3.x** and **PyQt6** for the GUI:
+
    ```bash
    sudo apt update
    sudo apt install python3 python3-pyqt6
