@@ -38,23 +38,18 @@ Before using this GUI, ensure the following dependencies are installed:
 
 ## Usage
 
-1. Navigate to the repository folder:
-   ```bash
-   cd OpenROAD_GUI
-   ```
-
-2. Launch the GUI:
+1. Launch the GUI:
    ```bash
    python3 main.py
    ```
 
-3. Once the GUI is open, you can:
+2. Once the GUI is open, you can:
    - Load your design files.
    - Configure tool parameters and settings.
    - Start the OpenROAD flow with a simple button click.
    - Monitor the process through real-time logs and progress updates.
 
-4. Upon completion, you will be able to view the results and make any necessary adjustments to your design.
+3. Upon completion, you will be able to view the results and make any necessary adjustments to your design.
 
 ## Configuration
 
