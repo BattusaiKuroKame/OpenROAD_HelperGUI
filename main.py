@@ -161,8 +161,11 @@ class PDKManagerApp(QWidget):
             shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
             shutil.copytree(design_folder, dest_pdk, dirs_exist_ok=True)
             
-            shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
-            shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
+            self.reset_config()
+            self.reset_constraints()
+
+            # shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
+            # shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
             self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
 
             # self.source_env()
@@ -188,14 +191,26 @@ class PDKManagerApp(QWidget):
     
     def reset_config(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
+        # shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
+
+        with open("defaultConfig.txt", "r") as file:
+                makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
+                with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
+                    file.write(makefile_data)
+
         if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
             self.edit_file("config.mk")
         self.log("Reset config.mk")
     
     def reset_constraints(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
+        # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
+
+        with open("defaultConstraints.txt", "r") as file:
+                makefile_data = file.read().replace("gcd",self.imported_design)
+                with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
+                    file.write(makefile_data)
+
         if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
             self.edit_file("constraints.sdc")
         self.log("Reset constraints.sdc")
