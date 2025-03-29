@@ -156,9 +156,10 @@ class PDKManagerApp(QWidget):
     
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
-        file_path = f"designs/{selected_pdk}/{file_name}"
+        file_path = f"designs/{selected_pdk}/{self.imported_design}/{file_name}"
         if os.path.exists(file_path):
             self.current_file = file_path
+            
             with open(file_path, "r") as file:
                 self.text_edit.setText(file.read())
             self.text_edit.setVisible(True)
@@ -174,15 +175,15 @@ class PDKManagerApp(QWidget):
     
     def reset_config(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/config.mk")
-        if self.current_file == f"platforms/{selected_pdk}/config.mk":
+        shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
+        if self.current_file == f"designs/{selected_pdk}/config.mk":
             self.edit_file("config.mk")
         self.log("Reset config.mk")
     
     def reset_constraints(self):
         selected_pdk = self.pdk_dropdown.currentText()
-        shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/constraints.sdc")
-        if self.current_file == f"platforms/{selected_pdk}/constraints.sdc":
+        shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
+        if self.current_file == f"designs/{selected_pdk}/constraints.sdc":
             self.edit_file("constraints.sdc")
         self.log("Reset constraints.sdc")
     
