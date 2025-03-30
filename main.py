@@ -2,14 +2,244 @@ import sys
 import os
 import shutil
 import subprocess
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QFileDialog, QComboBox, QTextEdit, QSplitter
-)
-from PyQt6.QtCore import Qt
+import json
+from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
+from PyQt6.QtCore import Qt  # Import Qt for alignment
 
-class PDKManagerApp(QWidget):
+filepath = "ORgui/"
 
+# Widget for file editing
+class textEditor(QWidget):
+    def __init__(self, log_callback):
+        super().__init__()
+        self.log = log_callback
+        self.current_file = ""
+        
+        self.layout = QVBoxLayout()
+        
+        self.text_edit = QTextEdit()
+        self.layout.addWidget(self.text_edit)
+        
+        self.save_button = QPushButton("Save File")
+        self.save_button.clicked.connect(self.save_file)
+        self.layout.addWidget(self.save_button)
+        
+        self.setLayout(self.layout)
+    
+    def open_file(self, file_path):
+        try:
+            with open(file_path, "r") as file:
+                self.text_edit.setText(file.read())
+            self.current_file = file_path
+            self.log(f"Opened file: {file_path}")
+        except Exception as e:
+            self.log(f"Failed to open file: {e}")
+    
+    def save_file(self):
+        if self.current_file:
+            try:
+                with open(self.current_file, "w") as file:
+                    file.write(self.text_edit.toPlainText())
+                self.log(f"Saved file: {self.current_file}")
+            except Exception as e:
+                self.log(f"Failed to save file: {e}")
+        else:
+            self.log("No file opened to save.")
+
+#Settings Window
+class SettingsWindow(QDialog):
+
+    themes = []
+
+    def reposition(self,parent):
+        """Center the settings window relative to the main window."""
+        parent_geometry = parent.geometry()
+        x = parent_geometry.x() + (parent_geometry.width() - self.width()) // 2
+        y = parent_geometry.y() + (parent_geometry.height() - self.height()) // 2
+        self.move(x, y)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.setGeometry(150, 150, 300, 200)
+
+        # self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        # self.setMinimumSize(200, 100)  # Set a reasonable minimum size
+        # self.adjustSize()  # Adjust size dynamically
+
+        # Apply shadow effect
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setXOffset(0)
+        shadow.setYOffset(0)
+        shadow.setColor(Qt.GlobalColor.black)
+        self.setGraphicsEffect(shadow)
+        self.reposition(parent)
+        # if parent:  # Ensure we have a parent window
+        #     parent_geometry = parent.geometry()
+        #     x = parent_geometry.x() + (parent_geometry.width() - self.width()) // 2
+        #     y = parent_geometry.y() + (parent_geometry.height() - self.height()) // 2
+        #     self.move(x, y)
+
+        
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # Align contents to the top
+
+        # Theme Selection
+        self.theme_label = QLabel("Select Theme:")
+        self.theme_dropdown = QComboBox()
+
+        #Load Settings from file
+        with open(filepath+"settings.json",'r') as file:
+            data = json.load(file)
+
+        self.themes = data["themes"]
+
+        self.theme_dropdown.addItems([theme["name"] for theme in data["themes"]])
+        self.theme_dropdown.currentTextChanged.connect(self.change_theme)  # Apply theme on selection change
+        # self.theme_dropdown.move(self.theme_dropdown.currentIndex(),0)
+                    
+        # self.theme_dropdown.removeItem(self.theme_dropdown.currentIndex)
+        # self.theme_dropdown.move(self.theme_dropdown.currentIndex,0)
+        layout.addWidget(self.theme_label)
+        layout.addWidget(self.theme_dropdown)
+
+        # # Apply and Close Buttons
+        # self.apply_button = QPushButton("Apply")
+        # self.apply_button.clicked.connect(self.apply_settings)
+
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.close)
+
+        # layout.addWidget(self.apply_button)
+        layout.addWidget(self.close_button)
+
+        self.setLayout(layout)
+
+
+    def change_theme(self):
+        """Apply settings and update the main window"""
+        theme = self.theme_dropdown.currentText()
+
+        for el in self.themes:
+            if el["name"] == theme:
+                self.parent().setStyleSheet(el["data"])
+
+        #Load Settings from file
+        with open(filepath+"settings.json",'w+') as file:
+            # print(data)
+
+            for el in self.themes:
+                if el["name"] == theme:
+                    sel = el
+            self.themes.insert(0,self.themes.pop(self.themes.index(sel)))
+            # print(self.themes)
+            data = {}
+            data["themes"] = self.themes
+            json.dump(data,file,indent=4)
+        
+        self.parent().log("Theme Applied!")
+        print("Settings Applied!")  # Debugging message
+
+# Widget to display log messages
+class LogWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.layout = QVBoxLayout()
+        
+        # Text area for log messages
+        self.log_display = QTextEdit()
+        self.log_display.setReadOnly(True)  # Make it read-only
+        
+        self.layout.addWidget(self.log_display)
+        self.setLayout(self.layout)
+        
+    # Method to append log messages
+    def append_log(self, message):
+        self.log_display.append(message)
+
+# Widget for configuration controls
+class ConfigWidget(QWidget):
+    def __init__(self,main_window, log_callback):
+        super().__init__()
+        self.main_window = main_window
+        self.log = log_callback  # Reference to main app's log method
+        
+        self.current_file = None
+        self.imported_design = None  # Store the last imported design name
+        self.layout = QVBoxLayout()
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        # Settings Button
+        self.settings_button = QPushButton("⚙ Settings")
+        self.settings_button.clicked.connect(self.open_settings)
+        self.layout.addWidget(self.settings_button)
+        
+        # Select PDK (Dropdown)
+        self.pdk_label = QLabel("Select PDK:")
+        self.pdk_dropdown = QComboBox()
+        self.populate_pdk_dropdown()
+        self.pdk_dropdown.currentTextChanged.connect(self.pdk_changed)
+        self.layout.addWidget(self.pdk_label)
+        self.layout.addWidget(self.pdk_dropdown)
+        
+        # Source .env Button
+        self.source_env_button = QPushButton("Source Env")
+        self.source_env_button.clicked.connect(self.source_env)
+        self.layout.addWidget(self.source_env_button)
+        
+        # Imported Design Label
+        self.imported_design_label = QLabel("Imported Design: None")
+        self.layout.addWidget(self.imported_design_label)
+        
+        # Import Design Button
+        self.import_design_button = QPushButton("Import Design")
+        self.import_design_button.clicked.connect(self.import_design)
+        self.layout.addWidget(self.import_design_button)
+        
+        # Config Buttons (Edit & Reset in same row)
+        config_layout = QHBoxLayout()
+        self.config_button = QPushButton("Edit config.mk")
+        self.config_button.clicked.connect(lambda: self.edit_file("config.mk"))
+        self.reset_config_button = QPushButton("Reset config.mk")
+        self.reset_config_button.clicked.connect(self.reset_config)
+        config_layout.addWidget(self.config_button)
+        config_layout.addWidget(self.reset_config_button)
+        self.layout.addLayout(config_layout)
+        
+        # Constraints Buttons (Edit & Reset in same row)
+        constraints_layout = QHBoxLayout()
+        self.constraints_button = QPushButton("Edit constraints.sdc")
+        self.constraints_button.clicked.connect(lambda: self.edit_file("constraints.sdc"))
+        self.reset_constraints_button = QPushButton("Reset constraints.sdc")
+        self.reset_constraints_button.clicked.connect(self.reset_constraints)
+        constraints_layout.addWidget(self.constraints_button)
+        constraints_layout.addWidget(self.reset_constraints_button)
+        self.layout.addLayout(constraints_layout)
+        
+        # Set Makefile & Run Make Buttons
+        self.set_makefile_button = QPushButton("Set Makefile")
+        self.set_makefile_button.clicked.connect(self.set_makefile)
+        self.layout.addWidget(self.set_makefile_button)
+        
+        self.run_make_button = QPushButton("Run Make")
+        self.run_make_button.clicked.connect(self.run_make)
+        self.layout.addWidget(self.run_make_button)
+        
+        # Edit File Area
+        self.text_edit = QTextEdit()
+        self.text_edit.setVisible(False)
+        self.layout.addWidget(self.text_edit)
+        
+        self.save_button = QPushButton("Save File")
+        self.save_button.setVisible(False)
+        self.save_button.clicked.connect(self.save_file)
+        self.layout.addWidget(self.save_button)
+        
+        self.setLayout(self.layout)
+    
     def is_ubuntu(self):
         try:
             with open("/etc/os-release") as f:
@@ -17,118 +247,29 @@ class PDKManagerApp(QWidget):
         except FileNotFoundError:
             return False
 
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("OpenROAD GUI")
-        self.setGeometry(100, 100, 600, 500)
-        self.initUI()
-        self.current_file = None
-        self.imported_design = None  # Store the last imported design name
-    
-    def initUI(self):
-        main_layout = QVBoxLayout()
-        
-        # Create a splitter for dynamic resizing
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        
-        # Console Output (Left Side, takes most space)
-        self.console_output = QTextEdit()
-        self.console_output.setReadOnly(True)
-        splitter.addWidget(self.console_output)
-        
-        # Buttons Layout (Right Side, Snapped to Top)
-        buttons_widget = QWidget()
-        buttons_layout = QVBoxLayout(buttons_widget)
-        buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        
-        # Select PDK (Same row as dropdown)
-        pdk_layout = QHBoxLayout()
-        self.pdk_label = QLabel("Select PDK:")
-        self.pdk_dropdown = QComboBox()
-        self.populate_pdk_dropdown()
-        self.pdk_dropdown.currentTextChanged.connect(self.pdk_changed)
-        pdk_layout.addWidget(self.pdk_label)
-        pdk_layout.addWidget(self.pdk_dropdown)
-        buttons_layout.addLayout(pdk_layout)
 
-        # Source .env
-        self.sourceEnv_label = QPushButton("Source Env")
-        self.sourceEnv_label.clicked.connect(self.source_env)
-        buttons_layout.addWidget(self.sourceEnv_label)
-        
-        # Imported Design Label
-        self.imported_design_label = QLabel("Imported Design: None")
-        buttons_layout.addWidget(self.imported_design_label)
-        
-        # Import Design
-        self.import_design_button = QPushButton("Import Design")
-        self.import_design_button.clicked.connect(self.import_design)
-        buttons_layout.addWidget(self.import_design_button)
-        
-        # Edit config.mk & Reset config.mk (Same Row)
-        config_layout = QHBoxLayout()
-        self.edit_config_button = QPushButton("Edit config.mk")
-        self.edit_config_button.clicked.connect(lambda: self.edit_file("config.mk"))
-        config_layout.addWidget(self.edit_config_button)
-        
-        self.reset_config_button = QPushButton("Reset config.mk")
-        self.reset_config_button.clicked.connect(self.reset_config)
-        config_layout.addWidget(self.reset_config_button)
-        buttons_layout.addLayout(config_layout)
-        
-        # Edit constraints.sdc & Reset constraints.sdc (Same Row)
-        constraints_layout = QHBoxLayout()
-        self.edit_constraints_button = QPushButton("Edit constraints.sdc")
-        self.edit_constraints_button.clicked.connect(lambda: self.edit_file("constraints.sdc"))
-        constraints_layout.addWidget(self.edit_constraints_button)
-        
-        self.reset_constraints_button = QPushButton("Reset constraints.sdc")
-        self.reset_constraints_button.clicked.connect(self.reset_constraints)
-        constraints_layout.addWidget(self.reset_constraints_button)
-        buttons_layout.addLayout(constraints_layout)
-        
-        # Set Makefile & Run Make Layout
-        make_layout = QVBoxLayout()
-        self.set_makefile_button = QPushButton("Set Makefile")
-        self.set_makefile_button.clicked.connect(self.set_makefile)
-        make_layout.addWidget(self.set_makefile_button)
-        
-        self.run_make_button = QPushButton("Run Make")
-        self.run_make_button.clicked.connect(self.run_make)
-        make_layout.addWidget(self.run_make_button)
-        buttons_layout.addLayout(make_layout)
-        
-        # Edit File Area
-        self.text_edit = QTextEdit()
-        self.text_edit.setVisible(False)
-        buttons_layout.addWidget(self.text_edit)
-        
-        self.save_button = QPushButton("Save File")
-        self.save_button.setVisible(False)
-        self.save_button.clicked.connect(self.save_file)
-        buttons_layout.addWidget(self.save_button)
-        
-        # Add button layout to the right side
-        splitter.addWidget(buttons_widget)
-        
-        # Allow resizing
-        splitter.setStretchFactor(0, 2)
-        splitter.setStretchFactor(1, 1)
-        
-        main_layout.addWidget(splitter)
-        self.setLayout(main_layout)
+    def populate_pdk_dropdown(self):
+        pdk_path = "designs"
+        if os.path.exists(pdk_path):
+            items = [item for item in os.listdir(pdk_path) if item != 'src']
+            self.pdk_dropdown.addItems(items)
+            # self.pdk_dropdown.addItems(os.listdir(pdk_path))
     
-    def log(self, message):
-        self.console_output.append(message)
+    # Button action methods
+    def open_settings(self):
+        # self.log("Settings button clicked")
+        # self.settings_window = SettingsWindow(self)
+        self.settings_window = SettingsWindow(self.main_window)  # Pass main window
+        self.settings_window.exec()
+    
+    def pdk_changed(self, text):
+        self.log(f"PDK changed to: {text}")
+        self.imported_design = None
+        self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
+        
     
     def source_env(self):
-        #Windows
-        # os.system("source .env")
-        # self.log("Sourced .env file")
-
-        #Ubuntu
-        # Run the 'source .env' command in a new bash process and execute additional commands if necessary
-
+        # self.log("Source Env button clicked")
         if self.is_ubuntu():
 
             result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
@@ -139,17 +280,8 @@ class PDKManagerApp(QWidget):
         else:
             self.log("NOT UBUNTU")
     
-    def populate_pdk_dropdown(self):
-        pdk_path = "designs"
-        if os.path.exists(pdk_path):
-            items = [item for item in os.listdir(pdk_path) if item != 'src']
-            self.pdk_dropdown.addItems(items)
-            # self.pdk_dropdown.addItems(os.listdir(pdk_path))
-    
-    def pdk_changed(self, text):
-        self.log(f"Selected PDK: {text}")
-    
     def import_design(self):
+        # self.log("Import Design button clicked")
         design_folder = QFileDialog.getExistingDirectory(self, "Select Design Folder")
         if design_folder:
             self.imported_design = os.path.basename(design_folder)
@@ -167,9 +299,60 @@ class PDKManagerApp(QWidget):
             # shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
             # shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
             self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
-
-            # self.source_env()
     
+    def reset_config(self):
+        # self.log("Reset config.mk button clicked")
+        selected_pdk = self.pdk_dropdown.currentText()
+        # shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
+
+        if self.imported_design and selected_pdk:
+            with open(filepath+"defaultConfig.txt", "r") as file:
+                    makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
+                    with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
+                        file.write(makefile_data)
+
+            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
+                self.edit_file("config.mk")
+            self.log("Reset config.mk")
+        else:
+            self.log("SELECT DESIGN AND PDK FIRST")
+    
+    def reset_constraints(self):
+        # self.log("Reset constraints.sdc button clicked")
+        selected_pdk = self.pdk_dropdown.currentText()
+        # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
+
+        if self.imported_design and selected_pdk:
+            with open(filepath+"defaultConstraints.txt", "r") as file:
+                    makefile_data = file.read().replace("gcd",self.imported_design)
+                    with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
+                        file.write(makefile_data)
+
+            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
+                self.edit_file("constraints.sdc")
+            self.log("Reset constraints.sdc")
+        else:
+            self.log("SELECT DESIGN AND PDK FIRST")
+    
+    def set_makefile(self):
+        # self.log("Set Makefile button clicked")
+        if self.imported_design:
+            with open(filepath+"defaultMakefile.txt", "r") as file:
+                makefile_data = file.read().replace("DESIGN_CONFIG ?= ./designs/nangate45/gcd/config.mk", "DESIGN_CONFIG ?= ./designs/"+self.pdk_dropdown.currentText()+"/"+self.imported_design+"/config.mk")
+            with open("Makefile", "w") as file:
+                file.write(makefile_data)
+            self.log("Makefile updated")
+        else:
+            self.log("No design has been imported yet.")
+    
+    def run_make(self):
+        # self.log("Run Make button clicked")
+        if self.is_ubuntu():
+            subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
+            self.log("Running make...")
+        else:
+            self.log("NOT UBUNTU")
+
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
 
@@ -186,81 +369,57 @@ class PDKManagerApp(QWidget):
             self.log("SELECT DESIGN AND PDK FIRST")
     
     def save_file(self):
+        self.log("Save File button clicked")
+
         if self.current_file:
             with open(self.current_file, "w") as file:
                 file.write(self.text_edit.toPlainText())
             self.text_edit.setVisible(False)
             self.save_button.setVisible(False)
             self.log(f"Saved {self.current_file}")
+        
+# Main application window
+class SimpleMainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        
+        self.setWindowTitle("Simple PyQt6 App")  # Set window title
+        self.setGeometry(100, 100, 600, 300)  # Set window size and position
+        
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)  # Set central widget
+        
+        self.layout = QVBoxLayout()
+        
+        # Splitter to allow dynamic resizing
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # Log widget to display application logs
+        self.log_widget = LogWidget()
+        self.splitter.addWidget(self.log_widget)
+        
+        # Config widget
+        self.config_widget = ConfigWidget(self,self.log)
+        self.splitter.addWidget(self.config_widget)
+        
+        self.layout.addWidget(self.splitter)
+        
+        self.central_widget.setLayout(self.layout)
+        
+        self.log("Application started.")  # Log initial message
     
-    def reset_config(self):
-        selected_pdk = self.pdk_dropdown.currentText()
-        # shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
+    # Method to log messages to the log widget
+    def log(self, message):
+        self.log_widget.append_log(message)
 
-        if self.imported_design and selected_pdk:
-            with open("defaultConfig.txt", "r") as file:
-                    makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
-                    with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
-                        file.write(makefile_data)
-
-            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/config.mk":
-                self.edit_file("config.mk")
-            self.log("Reset config.mk")
-        else:
-            self.log("SELECT DESIGN AND PDK FIRST")
-    
-    def reset_constraints(self):
-        selected_pdk = self.pdk_dropdown.currentText()
-        # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
-
-        if self.imported_design and selected_pdk:
-            with open("defaultConstraints.txt", "r") as file:
-                    makefile_data = file.read().replace("gcd",self.imported_design)
-                    with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
-                        file.write(makefile_data)
-
-            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
-                self.edit_file("constraints.sdc")
-            self.log("Reset constraints.sdc")
-        else:
-            self.log("SELECT DESIGN AND PDK FIRST")
-    
-    def set_makefile(self):
-        if self.imported_design:
-            with open("defaultMakefile.txt", "r") as file:
-                makefile_data = file.read().replace("DESIGN_CONFIG ?= ./designs/nangate45/gcd/config.mk", "DESIGN_CONFIG ?= ./designs/"+self.pdk_dropdown.currentText()+"/"+self.imported_design+"/config.mk")
-            with open("Makefile", "w") as file:
-                file.write(makefile_data)
-            self.log("Makefile updated")
-        else:
-            self.log("No design has been imported yet.")
-    
-    def run_make(self):
-        if self.is_ubuntu():
-            subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
-            self.log("Running make...")
-        else:
-            self.log("NOT UBUNTU")
-
-
+# Entry point of the application
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # Dark Mode Style
-    dark_stylesheet = """
-    QWidget {
-        background-color: #2e2e2e;
-        color: white;
-    }
-    QPushButton {
-        background-color: #444444;
-        color: white;
-        border: 1px solid #888888;
-    }
-    QPushButton:hover {
-        background-color: #555555;
-    }
-    """
-    app.setStyleSheet(dark_stylesheet)
-    window = PDKManagerApp()
+    with open(filepath+"settings.json") as file:
+        data = json.load(file)
+        themes = data["themes"]
+        last_theme = themes[0]["data"]
+    app.setStyleSheet(last_theme)#dark_stylesheet)
+    window = SimpleMainWindow()
     window.show()
     sys.exit(app.exec())
