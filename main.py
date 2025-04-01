@@ -154,6 +154,10 @@ class ConfigWidget(QWidget):
         self.settings_button.clicked.connect(self.open_settings)
         self.layout.addWidget(self.settings_button)
         
+        self.setup = QLabel("Setup")
+        self.setup.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(self.setup)
+
         # Select PDK (Dropdown)
         self.pdk_label = QLabel("Select PDK:")
         self.pdk_dropdown = QComboBox()
@@ -164,12 +168,6 @@ class ConfigWidget(QWidget):
         self.layout.addWidget(self.pdk_dropdown)
 
         self.pdk = self.pdk_dropdown.currentText()
-        
-        # Source .env Button
-        self.source_env_button = QPushButton("Source Env")
-        self.source_env_button.clicked.connect(self.source_env)
-        self.source_env_button.setToolTip("Source the .env file in the flow scripts directory")
-        self.layout.addWidget(self.source_env_button)
         
         # Imported Design Label
         self.imported_design_label = QLabel("Imported Design: None")
@@ -214,6 +212,17 @@ class ConfigWidget(QWidget):
         # self.set_makefile_button.clicked.connect(self.set_makefile)
         # self.set_makefile_button.setToolTip("Modify the makefile for your design")
         # self.layout.addWidget(self.set_makefile_button)
+
+
+        self.gen = QLabel("Generate")
+        self.gen.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(self.gen)
+
+        # Source .env Button
+        self.source_env_button = QPushButton("Source Env")
+        self.source_env_button.clicked.connect(self.source_env)
+        self.source_env_button.setToolTip("Source the .env file in the flow scripts directory")
+        self.layout.addWidget(self.source_env_button)
         
         #Run Make Button
         self.run_make_button = QPushButton("Run Make")
