@@ -72,13 +72,27 @@ class SettingsWindow(QDialog):
         # self.apply_button = QPushButton("Apply")
         # self.apply_button.clicked.connect(self.apply_settings)
 
-        self.close_button = QPushButton("Close")
-        self.close_button.clicked.connect(self.close)
+        self.update_button = QPushButton("Display Update Command")
+        self.update_button.clicked.connect(self.updateGUI)
+        self.update_button.setToolTip("Update to latest version")
+        layout.addWidget(self.update_button)
+
+        # self.close_button = QPushButton("Close")
+        # self.close_button.clicked.connect(self.close)
 
         # layout.addWidget(self.apply_button)
-        layout.addWidget(self.close_button)
+        # layout.addWidget(self.close_button)
 
         self.setLayout(layout)
+
+    def updateGUI(self):
+        # self.parent().run("rm -rf temp_repo && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git temp_repo && cp -r temp_repo/* temp_repo/.[!.]* . ")
+        # self.parent().log("UPDATED")
+
+        command = "rm -rf temp_repo && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git temp_repo && cp -r temp_repo/* temp_repo/.[!.]* . "
+
+        self.parent().log("\nUpdate Command"+"\n"+command +"\n")
+
 
 
     def change_theme(self):
@@ -103,7 +117,7 @@ class SettingsWindow(QDialog):
             json.dump(data,file,indent=4)
         
         self.parent().log("Theme Applied!")
-        print("Settings Applied!")  # Debugging message
+        # print("Settings Applied!")  # Debugging message
 
 # Widget to display log messages
 class LogWidget(QWidget):
@@ -458,7 +472,7 @@ class SimpleMainWindow(QMainWindow):
         """Read the output from the shell and clean it."""
         output = self.process.readAllStandardOutput().data().decode()
         clean_output = strip_ansi_codes(output)  # Remove ANSI codes
-        self.log("\n"+clean_output)
+        self.log("\n"+clean_output+"\n")
 
     # def read_output(self):
     #     """Read the output from the shell"""
