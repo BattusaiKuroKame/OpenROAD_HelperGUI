@@ -193,11 +193,11 @@ class ConfigWidget(QWidget):
         constraints_layout.addWidget(self.reset_constraints_button,1)
         self.layout.addLayout(constraints_layout)
         
-        # Set Makefile Button
-        self.set_makefile_button = QPushButton("Set Makefile")
-        self.set_makefile_button.clicked.connect(self.set_makefile)
-        self.set_makefile_button.setToolTip("Modify the makefile for your design")
-        self.layout.addWidget(self.set_makefile_button)
+        # # Set Makefile Button
+        # self.set_makefile_button = QPushButton("Set Makefile")
+        # self.set_makefile_button.clicked.connect(self.set_makefile)
+        # self.set_makefile_button.setToolTip("Modify the makefile for your design")
+        # self.layout.addWidget(self.set_makefile_button)
         
         #Run Make Button
         self.run_make_button = QPushButton("Run Make")
@@ -257,9 +257,10 @@ class ConfigWidget(QWidget):
         self.settings_window.exec()
     
     def pdk_changed(self, text):
-        self.log(f"PDK changed to: {text}")
-        self.imported_design = None
-        self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
+        # self.log(f"PDK changed to: {text}")
+        self.pdk = text
+        self.main_window.log(f"PDK changedto: {self.pdk}")
+        # self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
         
     
     def source_env(self):
@@ -346,8 +347,15 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
-            self.main_window.run('make; exec bash')
-            self.log("Running make...")
+            # self.main_window.run('make; exec bash')
+            if self.imported_design and self.pdk:
+                self.main_window.log(f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}')
+                self.main_window.run(f"make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+'; exec bash')
+                self.log("Running make...")
+            else:
+                # self.log("SELECT DESIGN AND PDK FIRST")
+                self.main_window.log('\nDEFAULT MAKE')
+                self.main_window.run('make; exec bash')
         else:
             self.log("NOT UBUNTU")
 
@@ -450,7 +458,7 @@ class SimpleMainWindow(QMainWindow):
         """Read the output from the shell and clean it."""
         output = self.process.readAllStandardOutput().data().decode()
         clean_output = strip_ansi_codes(output)  # Remove ANSI codes
-        self.log(clean_output)
+        self.log("\n"+clean_output)
 
     # def read_output(self):
     #     """Read the output from the shell"""
