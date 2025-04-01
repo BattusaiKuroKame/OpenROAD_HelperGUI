@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import subprocess
+import re
 import json
 from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
 from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
@@ -224,8 +225,19 @@ class ConfigWidget(QWidget):
     
     def is_ubuntu(self):
         try:
+            # with open("/etc/os-release") as f:
+            #     return any("ubuntu" in line.lower() for line in f)
             with open("/etc/os-release") as f:
-                return any("ubuntu" in line.lower() for line in f)
+                content = f.read().lower()  # Read all content and convert to lowercase
+
+                if "ubuntu" in content:
+                    return "Ubuntu"
+                elif "centos" in content:
+                    return "CentOS"
+                elif "debian" in content:
+                    return "Debian"
+                else:
+                    return "Unknown Linux distribution"
         except FileNotFoundError:
             return False
 
@@ -334,7 +346,7 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
-            self.main_window.run('gnome-terminal -- bash -c "make; exec bash"')
+            self.main_window.run('make; exec bash')
             self.log("Running make...")
         else:
             self.log("NOT UBUNTU")
@@ -427,11 +439,23 @@ class SimpleMainWindow(QMainWindow):
             self.process.write((cmd + "\n").encode())
         # if script:    #self.run_command(script = ["/path/to/your_script.sh",[arg1],[arg2]])
             # self.process.start("bash", script)
-
+    
     def read_output(self):
-        """Read the output from the shell"""
+        def strip_ansi_codes(text):
+            """Removes ANSI escape sequences from shell output."""
+            ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+            return ansi_escape.sub('', text)
+
+
+        """Read the output from the shell and clean it."""
         output = self.process.readAllStandardOutput().data().decode()
-        self.log(output)
+        clean_output = strip_ansi_codes(output)  # Remove ANSI codes
+        self.log(clean_output)
+
+    # def read_output(self):
+    #     """Read the output from the shell"""
+    #     output = self.process.readAllStandardOutput().data().decode()
+    #     self.log(output)
     
     # Method to log messages to the log widget
     def log(self, message):
