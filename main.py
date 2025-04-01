@@ -173,9 +173,9 @@ class ConfigWidget(QWidget):
         
         # Constraints Buttons (Edit & Reset in same row)
         constraints_layout = QHBoxLayout()
-        self.constraints_button = QPushButton("Edit constraints.sdc")
-        self.constraints_button.clicked.connect(lambda: self.edit_file("constraints.sdc"))
-        self.reset_constraints_button = QPushButton("Reset constraints.sdc")
+        self.constraints_button = QPushButton("Edit constraint.sdc")
+        self.constraints_button.clicked.connect(lambda: self.edit_file("constraint.sdc"))
+        self.reset_constraints_button = QPushButton("Reset constraint.sdc")
         self.reset_constraints_button.clicked.connect(self.reset_constraints)
         constraints_layout.addWidget(self.constraints_button)
         constraints_layout.addWidget(self.reset_constraints_button)
@@ -239,7 +239,7 @@ class ConfigWidget(QWidget):
             #     self.log(f"Sourced .env file successfully: {result.stdout}")
             # else:
             #     self.log(f"Failed to source .env file: {result.stderr}")
-            self.main_window.run(cmd = "cd .. && source ./env.sh && cd flow && echo 'Env sourced'")
+            self.main_window.run("cd .. && source ./env.sh && cd flow && echo 'Env sourced'")
             # subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
         else:
             self.log("NOT UBUNTU")
@@ -260,7 +260,7 @@ class ConfigWidget(QWidget):
             self.reset_config()
             self.reset_constraints()
 
-            # shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraints.sdc")
+            # shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraint.sdc")
             # shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
             self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
     
@@ -282,19 +282,19 @@ class ConfigWidget(QWidget):
             self.log("SELECT DESIGN AND PDK FIRST")
     
     def reset_constraints(self):
-        # self.log("Reset constraints.sdc button clicked")
+        # self.log("Reset constraint.sdc button clicked")
         selected_pdk = self.pdk_dropdown.currentText()
-        # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc")
+        # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraint.sdc")
 
         if self.imported_design and selected_pdk:
             with open(filepath+"defaultConstraints.txt", "r") as file:
                     makefile_data = file.read().replace("gcd",self.imported_design)
-                    with open(f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc", "w") as file:
+                    with open(f"designs/{selected_pdk}/{self.imported_design}/constraint.sdc", "w") as file:
                         file.write(makefile_data)
 
-            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraints.sdc":
-                self.edit_file("constraints.sdc")
-            self.log("Reset constraints.sdc")
+            if self.current_file == f"designs/{selected_pdk}/{self.imported_design}/constraint.sdc":
+                self.edit_file("constraint.sdc")
+            self.log("Reset constraint.sdc")
         else:
             self.log("SELECT DESIGN AND PDK FIRST")
     
@@ -312,7 +312,8 @@ class ConfigWidget(QWidget):
     def run_make(self):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
-            subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
+            # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
+            self.main_window.run('gnome-terminal -- bash -c "make; exec bash"')
             self.log("Running make...")
         else:
             self.log("NOT UBUNTU")
@@ -387,12 +388,12 @@ class SimpleMainWindow(QMainWindow):
         
         self.log("Application started.")  # Log initial message
 
-    def run(self, cmd,script ):
+    def run(self, cmd ):
         """Send a command to the persistent shell"""
         if cmd:     #self.run_command(cmd = "ls")
             self.process.write((cmd + "\n").encode())
-        if script:    #self.run_command(script = ["/path/to/your_script.sh",[arg1],[arg2]])
-            self.process.start("bash", script)
+        # if script:    #self.run_command(script = ["/path/to/your_script.sh",[arg1],[arg2]])
+            # self.process.start("bash", script)
 
     def read_output(self):
         """Read the output from the shell"""
