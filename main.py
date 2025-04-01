@@ -102,7 +102,7 @@ class SettingsWindow(QDialog):
             json.dump(data,file,indent=4)
         
         self.parent().log("Theme Applied!")
-        #print("Settings Applied!")  # Debugging message
+        print("Settings Applied!")  # Debugging message
 
 # Widget to display log messages
 class LogWidget(QWidget):
@@ -124,10 +124,10 @@ class LogWidget(QWidget):
 
 # Widget for configuration controls
 class ConfigWidget(QWidget):
-    def __init__(self,main_window, log_callback):
+    def __init__(self,main_window):
         super().__init__()
         self.main_window = main_window
-        self.log = log_callback  # Reference to main app's log method
+        self.log = main_window.log  # Reference to main app's log method
         
         self.current_file = None
         self.imported_design = None  # Store the last imported design name
@@ -144,12 +144,14 @@ class ConfigWidget(QWidget):
         self.pdk_dropdown = QComboBox()
         self.populate_pdk_dropdown()
         self.pdk_dropdown.currentTextChanged.connect(self.pdk_changed)
+        self.pdk_dropdown.setToolTip("Select one from available PDKs")
         self.layout.addWidget(self.pdk_label)
         self.layout.addWidget(self.pdk_dropdown)
         
         # Source .env Button
         self.source_env_button = QPushButton("Source Env")
         self.source_env_button.clicked.connect(self.source_env)
+        self.source_env_button.setToolTip("Source the .env file in the flow scripts directory")
         self.layout.addWidget(self.source_env_button)
         
         # Imported Design Label
@@ -159,36 +161,54 @@ class ConfigWidget(QWidget):
         # Import Design Button
         self.import_design_button = QPushButton("Import Design")
         self.import_design_button.clicked.connect(self.import_design)
+        self.import_design_button.setToolTip("Select you design from disk")
         self.layout.addWidget(self.import_design_button)
         
         # Config Buttons (Edit & Reset in same row)
         config_layout = QHBoxLayout()
         self.config_button = QPushButton("Edit config.mk")
         self.config_button.clicked.connect(lambda: self.edit_file("config.mk"))
-        self.reset_config_button = QPushButton("Reset config.mk")
+        self.config_button.setToolTip("Edit the Config File")
+
+        # self.reset_config_button = QPushButton("Reset config.mk")
+        self.reset_config_button = QPushButton("↺")
         self.reset_config_button.clicked.connect(self.reset_config)
-        config_layout.addWidget(self.config_button)
-        config_layout.addWidget(self.reset_config_button)
+        self.reset_config_button.setToolTip("Reset the Config File to default")
+
+        config_layout.addWidget(self.config_button,9)
+        config_layout.addWidget(self.reset_config_button,1)
         self.layout.addLayout(config_layout)
         
         # Constraints Buttons (Edit & Reset in same row)
         constraints_layout = QHBoxLayout()
         self.constraints_button = QPushButton("Edit constraint.sdc")
         self.constraints_button.clicked.connect(lambda: self.edit_file("constraint.sdc"))
-        self.reset_constraints_button = QPushButton("Reset constraint.sdc")
+
+        self.reset_constraints_button = QPushButton("↺")
         self.reset_constraints_button.clicked.connect(self.reset_constraints)
-        constraints_layout.addWidget(self.constraints_button)
-        constraints_layout.addWidget(self.reset_constraints_button)
+        self.reset_constraints_button.setToolTip("Reset the Constraint File to default")
+
+        constraints_layout.addWidget(self.constraints_button,9)
+        constraints_layout.addWidget(self.reset_constraints_button,1)
         self.layout.addLayout(constraints_layout)
         
-        # Set Makefile & Run Make Buttons
+        # Set Makefile Button
         self.set_makefile_button = QPushButton("Set Makefile")
         self.set_makefile_button.clicked.connect(self.set_makefile)
+        self.set_makefile_button.setToolTip("Modify the makefile for your design")
         self.layout.addWidget(self.set_makefile_button)
         
+        #Run Make Button
         self.run_make_button = QPushButton("Run Make")
         self.run_make_button.clicked.connect(self.run_make)
+        self.run_make_button.setToolTip("Run the make command")
         self.layout.addWidget(self.run_make_button)
+
+        # Run OpenROAD GUI
+        self.openGui_button = QPushButton("OpenROAD Gui")
+        self.openGui_button.clicked.connect(self.openGui)
+        self.openGui_button.setToolTip("Open Generated GDSII File")
+        self.layout.addWidget(self.openGui_button)
         
         # Edit File Area
         self.text_edit = QTextEdit()
@@ -243,6 +263,7 @@ class ConfigWidget(QWidget):
             # subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
         else:
             self.log("NOT UBUNTU")
+            # self.log(self.main_window.path)
     
     def import_design(self):
         # self.log("Import Design button clicked")
@@ -318,6 +339,13 @@ class ConfigWidget(QWidget):
         else:
             self.log("NOT UBUNTU")
 
+    def openGui(self):
+        if self.is_ubuntu():
+            self.main_window.run('make gui_final')
+            self.log("Opening OpenROAD GUI")
+        else:
+            self.log("NOT UBUNTU")
+
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
 
@@ -345,6 +373,7 @@ class ConfigWidget(QWidget):
         
 # Main application window
 class SimpleMainWindow(QMainWindow):
+
     def __init__(self):
 
         super().__init__()
@@ -353,10 +382,13 @@ class SimpleMainWindow(QMainWindow):
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyRead.connect(self.read_output)
 
+        self.path = os.path.dirname(os.path.abspath(__file__))
+        self.log("Current Directory:\n"+self.path)
+
         # Start a persistent bash shell
         self.process.start("bash", ["-i"])
         
-        self.setWindowTitle("Simple PyQt6 App")  # Set window title
+        self.setWindowTitle("OpenROAD HelperGUI")  # Set window title
         self.setGeometry(100, 100, 600, 300)  # Set window size and position
         
     def initUI(self):
@@ -379,7 +411,7 @@ class SimpleMainWindow(QMainWindow):
         # self.layout.addWidget(self.output)
         
         # Config widget
-        self.config_widget = ConfigWidget(self,self.log)
+        self.config_widget = ConfigWidget(self)
         self.splitter.addWidget(self.config_widget)
         
         self.layout.addWidget(self.splitter)
@@ -387,6 +419,7 @@ class SimpleMainWindow(QMainWindow):
         self.central_widget.setLayout(self.layout)
         
         self.log("Application started.")  # Log initial message
+        # self.log("Path is "+ self.path)  # Log initial message
 
     def run(self, cmd ):
         """Send a command to the persistent shell"""
