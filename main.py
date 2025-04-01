@@ -174,10 +174,18 @@ class ConfigWidget(QWidget):
         self.layout.addWidget(self.imported_design_label)
         
         # Import Design Button
+        import_layout = QHBoxLayout()
         self.import_design_button = QPushButton("Import Design")
         self.import_design_button.clicked.connect(self.import_design)
         self.import_design_button.setToolTip("Select you design from disk")
-        self.layout.addWidget(self.import_design_button)
+
+        self.reset_import_button = QPushButton("↺")
+        self.reset_import_button.clicked.connect(self.reset_import)
+        self.reset_import_button.setToolTip("Reset import")
+
+        import_layout.addWidget(self.import_design_button,9)
+        import_layout.addWidget(self.reset_import_button,1)
+        self.layout.addLayout(import_layout)
         
         # Config Buttons (Edit & Reset in same row)
         config_layout = QHBoxLayout()
@@ -302,6 +310,10 @@ class ConfigWidget(QWidget):
         else:
             self.log("NOT UBUNTU")
             # self.log(self.main_window.path)
+
+    def reset_import(self):
+        self.imported_design = None
+        self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
     
     def import_design(self):
         # self.log("Import Design button clicked")
@@ -328,9 +340,11 @@ class ConfigWidget(QWidget):
         selected_pdk = self.pdk_dropdown.currentText()
         # shutil.copy("defaultConfig.txt", f"designs/{selected_pdk}/{self.imported_design}/config.mk")
 
-        if self.imported_design and selected_pdk:
-            with open(filepath+"defaultConfig.txt", "r") as file:
-                    makefile_data = (file.read().replace("gcd",self.imported_design)).replace("sky130hd",selected_pdk)
+        path = f"designs/{selected_pdk}/gcd/config.mk"
+
+        if self.imported_design and selected_pdk and os.path.exists(path):
+            with open(path, "r") as file:
+                    makefile_data = (file.read().replace("gcd",self.imported_design))
                     with open(f"designs/{selected_pdk}/{self.imported_design}/config.mk", "w") as file:
                         file.write(makefile_data)
 
@@ -338,15 +352,19 @@ class ConfigWidget(QWidget):
                 self.edit_file("config.mk")
             self.log("Reset config.mk")
         else:
-            self.log("SELECT DESIGN AND PDK FIRST")
+            if os.path.exists(path):
+                self.log("SELECT DESIGN AND PDK FIRST")
+            else:
+                self.log("gcd constraint and config file missing\nUnable to copy reference content")
     
     def reset_constraints(self):
         # self.log("Reset constraint.sdc button clicked")
         selected_pdk = self.pdk_dropdown.currentText()
         # shutil.copy("defaultConstraints.txt", f"designs/{selected_pdk}/{self.imported_design}/constraint.sdc")
+        path = f"designs/{selected_pdk}/gcd/constraint.sdc"
 
-        if self.imported_design and selected_pdk:
-            with open(filepath+"defaultConstraints.txt", "r") as file:
+        if self.imported_design and selected_pdk and os.path.exists(path):
+            with open(path, "r") as file:
                     makefile_data = file.read().replace("gcd",self.imported_design)
                     with open(f"designs/{selected_pdk}/{self.imported_design}/constraint.sdc", "w") as file:
                         file.write(makefile_data)
@@ -355,7 +373,10 @@ class ConfigWidget(QWidget):
                 self.edit_file("constraint.sdc")
             self.log("Reset constraint.sdc")
         else:
-            self.log("SELECT DESIGN AND PDK FIRST")
+            if os.path.exists(path):
+                self.log("SELECT DESIGN AND PDK FIRST")
+            else:
+                self.log("gcd constraint and config file missing\nUnable to copy reference content")
     
     def set_makefile(self):
         # self.log("Set Makefile button clicked")
