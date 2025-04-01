@@ -102,7 +102,7 @@ class SettingsWindow(QDialog):
             json.dump(data,file,indent=4)
         
         self.parent().log("Theme Applied!")
-        print("Settings Applied!")  # Debugging message
+        #print("Settings Applied!")  # Debugging message
 
 # Widget to display log messages
 class LogWidget(QWidget):
