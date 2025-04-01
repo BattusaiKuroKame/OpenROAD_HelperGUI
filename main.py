@@ -4,47 +4,9 @@ import shutil
 import subprocess
 import json
 from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
-from PyQt6.QtCore import Qt  # Import Qt for alignment
+from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
 
 filepath = "ORgui/"
-
-# Widget for file editing
-class textEditor(QWidget):
-    def __init__(self, log_callback):
-        super().__init__()
-        self.log = log_callback
-        self.current_file = ""
-        
-        self.layout = QVBoxLayout()
-        
-        self.text_edit = QTextEdit()
-        self.layout.addWidget(self.text_edit)
-        
-        self.save_button = QPushButton("Save File")
-        self.save_button.clicked.connect(self.save_file)
-        self.layout.addWidget(self.save_button)
-        
-        self.setLayout(self.layout)
-    
-    def open_file(self, file_path):
-        try:
-            with open(file_path, "r") as file:
-                self.text_edit.setText(file.read())
-            self.current_file = file_path
-            self.log(f"Opened file: {file_path}")
-        except Exception as e:
-            self.log(f"Failed to open file: {e}")
-    
-    def save_file(self):
-        if self.current_file:
-            try:
-                with open(self.current_file, "w") as file:
-                    file.write(self.text_edit.toPlainText())
-                self.log(f"Saved file: {self.current_file}")
-            except Exception as e:
-                self.log(f"Failed to save file: {e}")
-        else:
-            self.log("No file opened to save.")
 
 #Settings Window
 class SettingsWindow(QDialog):
@@ -272,11 +234,13 @@ class ConfigWidget(QWidget):
         # self.log("Source Env button clicked")
         if self.is_ubuntu():
 
-            result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
-            if result.returncode == 0:
-                self.log(f"Sourced .env file successfully: {result.stdout}")
-            else:
-                self.log(f"Failed to source .env file: {result.stderr}")
+            # result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
+            # if result.returncode == 0:
+            #     self.log(f"Sourced .env file successfully: {result.stdout}")
+            # else:
+            #     self.log(f"Failed to source .env file: {result.stderr}")
+            self.main_window.run(cmd = "cd .. && source ./env.sh && cd flow && echo 'Env sourced'")
+            # subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
         else:
             self.log("NOT UBUNTU")
     
@@ -381,11 +345,20 @@ class ConfigWidget(QWidget):
 # Main application window
 class SimpleMainWindow(QMainWindow):
     def __init__(self):
+
         super().__init__()
+        self.initUI()
+        self.process = QProcess(self)  # Persistent shell process
+        self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+        self.process.readyRead.connect(self.read_output)
+
+        # Start a persistent bash shell
+        self.process.start("bash", ["-i"])
         
         self.setWindowTitle("Simple PyQt6 App")  # Set window title
         self.setGeometry(100, 100, 600, 300)  # Set window size and position
         
+    def initUI(self):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)  # Set central widget
         
@@ -394,9 +367,15 @@ class SimpleMainWindow(QMainWindow):
         # Splitter to allow dynamic resizing
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
         
+
         # Log widget to display application logs
         self.log_widget = LogWidget()
         self.splitter.addWidget(self.log_widget)
+
+        # #Persistent Terminal
+        # self.output = QTextEdit(self)
+        # self.output.setReadOnly(True)
+        # self.layout.addWidget(self.output)
         
         # Config widget
         self.config_widget = ConfigWidget(self,self.log)
@@ -407,6 +386,18 @@ class SimpleMainWindow(QMainWindow):
         self.central_widget.setLayout(self.layout)
         
         self.log("Application started.")  # Log initial message
+
+    def run(self, cmd,script ):
+        """Send a command to the persistent shell"""
+        if cmd:     #self.run_command(cmd = "ls")
+            self.process.write((cmd + "\n").encode())
+        if script:    #self.run_command(script = ["/path/to/your_script.sh",[arg1],[arg2]])
+            self.process.start("bash", script)
+
+    def read_output(self):
+        """Read the output from the shell"""
+        output = self.process.readAllStandardOutput().data().decode()
+        self.log(output)
     
     # Method to log messages to the log widget
     def log(self, message):
