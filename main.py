@@ -145,7 +145,6 @@ class ConfigWidget(QWidget):
         self.log = main_window.log  # Reference to main app's log method
         
         self.current_file = None
-        self.pdk = None
         self.imported_design = None  # Store the last imported design name
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -163,6 +162,8 @@ class ConfigWidget(QWidget):
         self.pdk_dropdown.setToolTip("Select one from available PDKs")
         self.layout.addWidget(self.pdk_label)
         self.layout.addWidget(self.pdk_dropdown)
+
+        self.pdk = self.pdk_dropdown.currentText()
         
         # Source .env Button
         self.source_env_button = QPushButton("Source Env")
