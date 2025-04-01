@@ -145,6 +145,7 @@ class ConfigWidget(QWidget):
         self.log = main_window.log  # Reference to main app's log method
         
         self.current_file = None
+        self.pdk = None
         self.imported_design = None  # Store the last imported design name
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
