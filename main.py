@@ -94,7 +94,7 @@ class SettingsWindow(QDialog):
         # self.parent().run("rm -rf temp_repo && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git temp_repo && cp -r temp_repo/* temp_repo/.[!.]* . ")
         # self.parent().log("UPDATED")
 
-        command = git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git
+        command = "git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
 
         self.parent().log("\nUpdate Command"+"\n"+command +"\n")
 
@@ -415,7 +415,7 @@ class ConfigWidget(QWidget):
 
     def openGui(self):
         if self.is_ubuntu():
-            self.main_window.run('make gui_final')
+            self.main_window.run(command('make gui_final'))
             self.log("Opening OpenROAD GUI")
         else:
             self.log("NOT UBUNTU")
