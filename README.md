@@ -73,6 +73,7 @@ These options can be adjusted directly through the GUI interface.
 
 This project is licensed under the **GPU License**. For more information, refer to the [LICENSE](LICENSE) file.
 
+
 ## Contributing
 
 Contributions are welcome! If you have suggestions or improvements, feel free to fork the repository and submit a pull request. Ensure that your code follows the existing style and includes appropriate tests.
@@ -82,6 +83,8 @@ Contributions are welcome! If you have suggestions or improvements, feel free to
 - OpenROAD team for providing the OpenROAD flow tools.
 - PyQt6 for the GUI framework.
 - The open-source community for their continued support and contributions.
+- **[Nishit Bayen](https://github.com/nishit0072e)** for his valuable guidance and expertise in the field.
+
 
 --- 
 
