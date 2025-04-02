@@ -214,12 +214,6 @@ class ConfigWidget(QWidget):
         constraints_layout.addWidget(self.constraints_button,9)
         constraints_layout.addWidget(self.reset_constraints_button,1)
         self.layout.addLayout(constraints_layout)
-        
-        # # Set Makefile Button
-        # self.set_makefile_button = QPushButton("Set Makefile")
-        # self.set_makefile_button.clicked.connect(self.set_makefile)
-        # self.set_makefile_button.setToolTip("Modify the makefile for your design")
-        # self.layout.addWidget(self.set_makefile_button)
 
 
         self.gen = QLabel("Generate")
@@ -237,6 +231,12 @@ class ConfigWidget(QWidget):
         self.run_make_button.clicked.connect(self.run_make)
         self.run_make_button.setToolTip("Run the make command")
         self.layout.addWidget(self.run_make_button)
+
+        # Set Makefile Button
+        self.set_makefile_button = QPushButton("Set Makefile")
+        self.set_makefile_button.clicked.connect(self.set_makefile)
+        self.set_makefile_button.setToolTip("Modify the makefile for your design")
+        self.layout.addWidget(self.set_makefile_button)
 
         # Run OpenROAD GUI
         self.openGui_button = QPushButton("OpenROAD Gui")
