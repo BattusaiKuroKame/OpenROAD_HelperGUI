@@ -31,7 +31,7 @@ Before using this GUI, ensure the following dependencies are installed:
 
 2. Install the required Python dependencies:
    ```bash
-   pip3 install -r ORgui/requirements.txt
+   pip3 install -r ORHG/requirements.txt
    ```
 
 3. Ensure OpenROAD tools are installed and properly set up in your system. Refer to the [OpenROAD documentation](https://openroad.readthedocs.io/) for setup instructions.
@@ -65,7 +65,7 @@ These options can be adjusted directly through the GUI interface.
 - Ensure that OpenROAD tools are correctly installed and accessible from the command line.
 - Check that all required Python dependencies are installed by running:
   ```bash
-  pip3 install -r ORgui/requirements.txt
+  pip3 install -r ORHG/requirements.txt
   ```
 - If any errors occur, refer to the **Log Output** section in the GUI for details on what might have gone wrong.
 
