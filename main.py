@@ -8,6 +8,11 @@ from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadow
 from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
 
 filepath = ""
+comStart = "cd .. && cd flow && "
+comEnd = "&& cd .. && cd OpenROAD_HelperGUI; exec bash"
+
+def command(command:str):
+    return comStart + command + comEnd
 
 #Settings Window
 class SettingsWindow(QDialog):
@@ -399,7 +404,7 @@ class ConfigWidget(QWidget):
             # self.main_window.run('make; exec bash')
             if self.imported_design and self.pdk:
                 self.main_window.log(f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}')
-                self.main_window.run(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+' && cd .. cd OpenROAD_HelperGUI; exec bash')
+                self.main_window.run(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+' && cd .. && cd OpenROAD_HelperGUI; exec bash')
                 self.log("Running make...")
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
