@@ -15,7 +15,7 @@ This repository provides a graphical user interface (GUI) for the OpenROAD flow,
 Before using this GUI, ensure the following dependencies are installed:
 
 1. **Ubuntu 20.04 or later**.
-2. **OpenROAD flow tools**. You can install OpenROAD from the [official repository](https://github.com/The-OpenROAD-Project/OpenROAD).
+2. **OpenROAD flow tools**. You can install OpenROAD from the [official repository][(https://github.com/The-OpenROAD-Project/OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts)).
 3. **Python 3.x** and **PyQt6** for the GUI:
 
    ```bash
