@@ -40,7 +40,7 @@ Before using this GUI, ensure the following dependencies are installed:
 
 1. Launch the GUI:
    ```bash
-   python3 main.py
+   python3 ORHG.py
    ```
 
 2. Once the GUI is open, you can:
