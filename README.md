@@ -26,7 +26,7 @@ Before using this GUI, ensure the following dependencies are installed:
 
 1. Clone this repository to your local machine in the "OpenROAD-flow-scripts/" Directory:
    ```bash
-   git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git
+   rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git
    ```
 
 2. Install the required Python dependencies:
