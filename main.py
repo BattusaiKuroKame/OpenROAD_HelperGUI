@@ -6,10 +6,11 @@ import re
 import json
 from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
 from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
+from PyQt6.QtGui import QIcon
 
 filepath = ""
 comStart = "cd .. && cd flow && "
-comEnd = "&& cd .. && cd OpenROAD_HelperGUI; exec bash"
+comEnd = "&& cd .. && cd OpenROAD_HelperGUI"
 
 def command(command:str):
     return comStart + command + comEnd
@@ -124,11 +125,21 @@ class SettingsWindow(QDialog):
         self.parent().log("Theme Applied!")
         # print("Settings Applied!")  # Debugging message
 
+class ColorBox(QLabel):
+    def __init__(self):
+        super().__init__()
+        # self.setFixedSize(100, 100)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setStyleSheet("background-color: white; border: 1px solid black;")
+
+    def setColor(self,col = "white"):
+        self.setStyleSheet(f"background-color: {col}; border: 1px solid black;")
+
 # Widget to display log messages
 class LogWidget(QWidget):
     def __init__(self):
         super().__init__()
-        
+        # self.main_window = main_window
         self.layout = QVBoxLayout()
         
         # Text area for log messages
@@ -137,6 +148,12 @@ class LogWidget(QWidget):
         
         self.layout.addWidget(self.log_display)
         self.setLayout(self.layout)
+
+        self.indicator = ColorBox()
+        self.layout.addWidget(self.indicator)
+        self.setLayout(self.layout)
+
+
         
     # Method to append log messages
     def append_log(self, message):
@@ -229,6 +246,7 @@ class ConfigWidget(QWidget):
         self.source_env_button = QPushButton("Source Env")
         self.source_env_button.clicked.connect(self.source_env)
         self.source_env_button.setToolTip("Source the .env file in the flow scripts directory")
+        self.main_window.log_widget.indicator.setColor("white")
         self.layout.addWidget(self.source_env_button)
         
         #Run Make Button
@@ -400,16 +418,17 @@ class ConfigWidget(QWidget):
     def run_make(self):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
-            # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make; exec bash"])
-            # self.main_window.run('make; exec bash')
+            # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
+            # self.main_window.run('make')
             if self.imported_design and self.pdk:
-                self.main_window.log(f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}')
-                self.main_window.run(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+' && cd .. && cd OpenROAD_HelperGUI; exec bash')
+                temp = f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}'
+                self.main_window.log(temp)
+                self.main_window.run(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
                 self.log("Running make...")
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.main_window.run('make; exec bash')
+                self.main_window.run('make')
         else:
             self.log("NOT UBUNTU")
 
@@ -436,7 +455,6 @@ class ConfigWidget(QWidget):
             self.log("SELECT DESIGN AND PDK FIRST")
     
     def save_file(self):
-        self.log("Save File button clicked")
 
         if self.current_file:
             with open(self.current_file, "w") as file:
@@ -455,7 +473,7 @@ class SimpleMainWindow(QMainWindow):
         self.process = QProcess(self)  # Persistent shell process
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyRead.connect(self.read_output)
-
+        self.marker = "##command_executed_successfully$$"
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.log("Current Directory:\n"+self.path)
 
@@ -498,26 +516,34 @@ class SimpleMainWindow(QMainWindow):
     def run(self, cmd ):
         """Send a command to the persistent shell"""
         if cmd:     #self.run_command(cmd = "ls")
-            self.process.write((cmd + "\n").encode())
-        # if script:    #self.run_command(script = ["/path/to/your_script.sh",[arg1],[arg2]])
-            # self.process.start("bash", script)
+            self.log_widget.indicator.setColor("red")
+
+            #Wrapper to encase the command into
+            wrapper = f"{cmd};echo {self.marker}\n"
+
+            self.process.write((wrapper).encode())
+            if not self.process.waitForStarted():
+                self.log("Failed to start the process.")
     
     def read_output(self):
-        def strip_ansi_codes(text):
-            """Removes ANSI escape sequences from shell output."""
-            ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-            return ansi_escape.sub('', text)
+        # def strip_ansi_codes(text):
+        #     """Removes ANSI escape sequences from shell output."""
+        #     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        #     return ansi_escape.sub('', text)
 
 
         """Read the output from the shell and clean it."""
+        # output = self.process.readAllStandardOutput().data().decode()
         output = self.process.readAllStandardOutput().data().decode()
-        clean_output = strip_ansi_codes(output)  # Remove ANSI codes
-        self.log("\n"+clean_output+"\n")
+        # clean_output = strip_ansi_codes(output)  # Remove ANSI codes
 
-    # def read_output(self):
-    #     """Read the output from the shell"""
-    #     output = self.process.readAllStandardOutput().data().decode()
-    #     self.log(output)
+        if output.endswith("$ "):#(self.marker in output) or "OpenROAD_HelperGUI" in output:
+            self.log_widget.indicator.setColor("lime")#"green")
+            # if not(output.endswith("$ ")):
+            #     self.log(output+"\n")
+        else:
+            self.log_widget.indicator.setColor("red")
+            self.log(output+"\n")
     
     # Method to log messages to the log widget
     def log(self, message):
