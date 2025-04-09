@@ -29,7 +29,7 @@ Before using this GUI, ensure the following dependencies are installed:
    rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git
    ```
 
-2. Install the required Python dependencies:
+2. Install the required Python dependencies (Skip if already installed python 3 and PyQT6 from the Prerequisites section):
    ```bash
    cd OpenROAD_HelperGUI && pip3 install -r requirements.txt
    ```
