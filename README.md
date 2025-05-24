@@ -1,6 +1,7 @@
 # OpenROAD GUI For Design Setup For Ubuntu
 
 This repository provides a graphical user interface (GUI) for the OpenROAD flow, designed to streamline and simplify the process of setting up design and PDK files OpenROAD tools in an intuitive manner. It is intended to be run in an Ubuntu environment and uses **PyQt6** for the GUI.
+![Screenshot 2025-05-24 115742](https://github.com/user-attachments/assets/a00fb8cb-4125-4e9a-a062-423aefa72e8e)
 
 ## Features
 
