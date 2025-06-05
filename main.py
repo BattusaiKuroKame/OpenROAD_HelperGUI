@@ -365,7 +365,7 @@ class ConfigWidget(QWidget):
                 with open(file_path, "r") as infile:
                     outfile.write(f"// --- Start of {filename} ---\n")
                     outfile.write(infile.read())
-                    outfile.write(f"\n// --- End of {filename} ---\n\n")
+                    # outfile.write(f"\n// --- End of {filename} ---\n\n")
 
         self.log(f"Combined {len(verilog_files)} files into '{filepath}'.")
     
