@@ -337,6 +337,35 @@ class ConfigWidget(QWidget):
     def reset_import(self):
         self.imported_design = None
         self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
+        
+    def combine_verilog_files(self,input_dir, output_file):################################
+        """
+        Combines all .v files in the given directory into a single .v file.
+
+        Parameters:
+        input_dir (str): Path to the directory containing .v files.
+        output_file (str): Path to the output .v file to be created.
+        """
+        if not os.path.isdir(input_dir):
+            raise ValueError(f"The path '{input_dir}' is not a valid directory.")
+
+        verilog_files = sorted(
+        [f for f in os.listdir(input_dir) if f.endswith(".v")],
+        key=lambda x: x.lower()
+        )
+
+        if not verilog_files:
+            raise FileNotFoundError("No .v files found in the specified directory.")
+
+        with open(output_file, "w") as outfile:
+            for filename in verilog_files:
+                file_path = os.path.join(input_dir, filename)
+                with open(file_path, "r") as infile:
+                    outfile.write(f"// --- Start of {filename} ---\n")
+                    outfile.write(infile.read())
+                    outfile.write(f"\n// --- End of {filename} ---\n\n")
+
+        self.log(f"Combined {len(verilog_files)} files into '{output_file}'.")
     
     def import_design(self):
         # self.log("Import Design button clicked")
@@ -351,6 +380,8 @@ class ConfigWidget(QWidget):
             shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
             # shutil.copytree(design_folder, dest_pdk, dirs_exist_ok=True)
             os.makedirs(dest_pdk, exist_ok=True)
+            
+            self.combine_verilog_files(input_dir=design_folder, output_file = dest_src + f"/{self.imported_design}.v")############
             
             self.reset_config()
             self.reset_constraint()
