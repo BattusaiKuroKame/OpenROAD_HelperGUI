@@ -379,7 +379,7 @@ class ConfigWidget(QWidget):
             dest_src = f"../flow/designs/src/{self.imported_design}"
             dest_pdk = f"../flow/designs/{selected_pdk}/{self.imported_design}"
             
-            # shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
+            shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
             # shutil.copytree(design_folder, dest_pdk, dirs_exist_ok=True)
             os.makedirs(dest_pdk, exist_ok=True)
             
