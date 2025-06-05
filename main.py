@@ -338,7 +338,7 @@ class ConfigWidget(QWidget):
         self.imported_design = None
         self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
         
-    def combine_verilog_files(self,input_dir, output_file):################################
+    def combine_verilog_files(self,input_dir, output_dir,name):
         """
         Combines all .v files in the given directory into a single .v file.
 
@@ -356,8 +356,10 @@ class ConfigWidget(QWidget):
 
         if not verilog_files:
             raise FileNotFoundError("No .v files found in the specified directory.")
+        
+        filepath = output_dir + "/" + name
 
-        with open(output_file, "w") as outfile:
+        with open(filepath, "w") as outfile:
             for filename in verilog_files:
                 file_path = os.path.join(input_dir, filename)
                 with open(file_path, "r") as infile:
@@ -365,7 +367,7 @@ class ConfigWidget(QWidget):
                     outfile.write(infile.read())
                     outfile.write(f"\n// --- End of {filename} ---\n\n")
 
-        self.log(f"Combined {len(verilog_files)} files into '{output_file}'.")
+        self.log(f"Combined {len(verilog_files)} files into '{filepath}'.")
     
     def import_design(self):
         # self.log("Import Design button clicked")
@@ -377,11 +379,11 @@ class ConfigWidget(QWidget):
             dest_src = f"../flow/designs/src/{self.imported_design}"
             dest_pdk = f"../flow/designs/{selected_pdk}/{self.imported_design}"
             
-            shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
+            # shutil.copytree(design_folder, dest_src, dirs_exist_ok=True)
             # shutil.copytree(design_folder, dest_pdk, dirs_exist_ok=True)
             os.makedirs(dest_pdk, exist_ok=True)
             
-            self.combine_verilog_files(input_dir=design_folder, output_file = dest_src + f"/{self.imported_design}.v")############
+            self.combine_verilog_files(input_dir=design_folder, output_dir = dest_src ,name = self.imported_design + ".v")
             
             self.reset_config()
             self.reset_constraint()
