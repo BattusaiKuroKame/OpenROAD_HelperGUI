@@ -1,7 +1,7 @@
 import sys
 import os
 import shutil
-import subprocess
+import requests
 import re
 import json
 from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
@@ -170,6 +170,18 @@ class ConfigWidget(QWidget):
         self.imported_design = None  # Store the last imported design name
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        repo_name = "BattusaiKuroKame/OpenROAD_HelperGUI"
+        with open(filepath+"settings.json","r") as file:
+            data = json.load(file)
+            self.version = data["version"]
+
+        aVersion = self.check_latest_version(repo_name, self.version)
+
+        # Version
+        self.versionLabel = QLabel(f"{self.version}\n{aVersion[1]}")
+        self.versionLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.versionLabel)
         
         # Settings Button
         self.settings_button = QPushButton("⚙ Settings")
@@ -304,6 +316,38 @@ class ConfigWidget(QWidget):
             items = [item for item in os.listdir(pdk_path) if item != 'src']
             self.pdk_dropdown.addItems(items)
             # self.pdk_dropdown.addItems(os.listdir(pdk_path))
+
+    def check_latest_version(self,repo: str, current_version: str = None):
+        """
+        Checks the latest release version of a GitHub repository.
+
+        Parameters:
+            repo (str): GitHub repository in "owner/repo" format.
+            current_version (str): (Optional) Your currently installed version.
+
+        Returns:
+            str: The latest version tag name.
+        """
+        url = f"https://api.github.com/repos/{repo}/releases/latest"
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+
+            latest_release = response.json()
+            latest_version = latest_release["tag_name"]
+
+            print(f"Latest version on GitHub: {latest_version}")
+
+            if current_version: # Inform user if there's a new version available
+                if latest_version != current_version:
+                    latest_version = [latest_version,"A newer version is available!"]
+
+            return latest_version
+
+        except requests.exceptions.RequestException as e:
+            self.log("Error checking for updates:", e)
+
     
     # Button action methods
     def open_settings(self):
