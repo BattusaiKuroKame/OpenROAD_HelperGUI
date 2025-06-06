@@ -342,7 +342,7 @@ class ConfigWidget(QWidget):
             latest_release = response.json()
             latest_version = latest_release["tag_name"]
 
-            print(f"Latest version on GitHub: {latest_version}")
+            # print(f"Latest version on GitHub: {latest_version}")
 
             return latest_version
 
