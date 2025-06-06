@@ -97,7 +97,7 @@ class SettingsWindow(QDialog):
 
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
 
-        self.parent().log("\nUpdate Command"+"\n"+command +"\n")
+        self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
 
 
 
