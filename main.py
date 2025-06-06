@@ -178,8 +178,13 @@ class ConfigWidget(QWidget):
 
         aVersion = self.check_latest_version(repo_name, self.version)
 
+        if self.version != aVersion:
+            comm = f"\nnewer version {aVersion} is available"
+        else:
+            comm = ""
+
         # Version
-        self.versionLabel = QLabel(f"{self.version}\n{aVersion[1]}")
+        self.versionLabel = QLabel(f"{self.version}{comm}")
         self.versionLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.versionLabel)
         
@@ -338,10 +343,6 @@ class ConfigWidget(QWidget):
             latest_version = latest_release["tag_name"]
 
             print(f"Latest version on GitHub: {latest_version}")
-
-            if current_version: # Inform user if there's a new version available
-                if latest_version != current_version:
-                    latest_version = [latest_version,"A newer version is available!"]
 
             return latest_version
 
