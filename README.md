@@ -18,10 +18,14 @@ Before using this GUI, ensure the following dependencies are installed:
 
 1. **Ubuntu 20.04 or later**.
 2. **OpenROAD flow tools**. You can install OpenROAD from the [official repository][(https://github.com/The-OpenROAD-Project/OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts)).
-3. **Python 3.x** and **PyQt6** for the GUI:
+3. **Ubuntu Update and Upgrade commands (may skip)**
+   ```
+   sudo apt update && sudo apt upgrade -y
+   ```
+4. **Python 3.x** and **PyQt6** for the GUI:
 
    ```bash
-   sudo apt update && sudo apt upgrade -y && sudo apt install -y python3 python3-pip && pip install --upgrade pip && pip install PyQt6 && pip install requests
+   sudo apt install -y python3 python3-pip && pip install --upgrade pip && pip install PyQt6 && pip install requests
    ```
 
 ## Installation
@@ -73,7 +77,7 @@ These options can be adjusted directly through the GUI interface.
 
 ## License
 
-This project is licensed under the **GPU License**. For more information, refer to the [LICENSE](LICENSE) file.
+This project is licensed under the **GPL License**. For more information, refer to the [LICENSE](LICENSE) file.
 
 
 ## Contributing
