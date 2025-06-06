@@ -21,7 +21,7 @@ Before using this GUI, ensure the following dependencies are installed:
 3. **Python 3.x** and **PyQt6** for the GUI:
 
    ```bash
-   sudo apt update && sudo apt upgrade -y && sudo apt install -y python3 python3-pip && pip install --upgrade pip && pip install PyQt6
+   sudo apt update && sudo apt upgrade -y && sudo apt install -y python3 python3-pip && pip install --upgrade pip && pip install PyQt6 && pip install requests
    ```
 
 ## Installation
