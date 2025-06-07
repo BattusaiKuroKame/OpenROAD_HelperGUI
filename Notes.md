@@ -4,4 +4,6 @@
 export SYNTH_HIERARCHICAL = 1
 ```
 ## Also change EQUIVALENCE_CHECK value to 0:
+```
 export EQUIVALENCE_CHECK     ?=   0
+```
