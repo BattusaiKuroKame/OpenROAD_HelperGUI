@@ -1,11 +1,13 @@
 # Enabling hierarchical synthesis in the config.mk is helpful to avoid congestion, add this line to the config.mk
 ```
+# Add this to config.mk file
 # Enable hierarchical synthesis
 export SYNTH_HIERARCHICAL = 1
 ```
 # Also change EQUIVALENCE_CHECK value to 0 for sky130 PDKs help avoid error:
 ## EQUIVALENCE_CHECK must be enabled for any tapeout (export EQUIVALENCE_CHECK?=1)
 ```
+# Add this to config.mk file
 export EQUIVALENCE_CHECK     ?=   0
 ```
 
