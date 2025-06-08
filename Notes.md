@@ -41,8 +41,8 @@ export SYNTH_HIERARCHICAL = 1
 
 ```
 # Additional instructions can be given using the floorplan.tcl file (not necessary but may help)
-## If using floorplan.tcl the file must exist in proper location to avoid any error
-  Add the following to the config.mk file
+If using floorplan.tcl the file must exist in proper location to avoid any error
+Add the following to the config.mk file
 
 ```
 # Use custom congestion-aware floorplan
