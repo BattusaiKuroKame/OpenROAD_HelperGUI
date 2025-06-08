@@ -25,10 +25,6 @@ export TNS_END_PERCENT        = 100
 export EQUIVALENCE_CHECK     ?=   1
 export REMOVE_CELLS_FOR_EQY   = sky130_fd_sc_hs__tapvpwrvgnd*
 
-# Use custom congestion-aware floorplan
-# Add floorplan.tcl in the 'OpenROAD-flow-scripts/flow/designs/<platform>/<design>/floorplan.tcl' directory
-export ADDITIONAL_FLOORPLAN = $(DESIGN_DIR)/floorplan.tcl
-
 # Enable hierarchical synthesis
 export SYNTH_HIERARCHICAL = 1
 
