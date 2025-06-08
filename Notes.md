@@ -22,7 +22,7 @@ export ADDER_MAP_FILE :=
 export CORE_UTILIZATION = 40
 export PLACE_DENSITY_LB_ADDON = 0.1
 export TNS_END_PERCENT        = 100
-export EQUIVALENCE_CHECK     ?=   0
+export EQUIVALENCE_CHECK     ?=   1
 export REMOVE_CELLS_FOR_EQY   = sky130_fd_sc_hs__tapvpwrvgnd*
 
 # Use custom congestion-aware floorplan
