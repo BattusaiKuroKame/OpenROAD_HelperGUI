@@ -4,6 +4,13 @@
 export SYNTH_HIERARCHICAL = 1
 ```
 ## Also change EQUIVALENCE_CHECK value to 0 for sky130 PDKs help avoid error:
+#EQUIVALENCE_CHECK must be enabled for any tapeout
+| Situation               | Use Equivalence Check?  |
+| ----------------------- | ----------------------- |
+| Tapeout / final netlist | ✅ Must                  |
+| Academic projects       | ⚠️ Optional             |
+| Debugging flow changes  | ✅ Helpful               |
+| Minor optimizations     | ❌ Not needed every time |
 ```
 export EQUIVALENCE_CHECK     ?=   0
 ```
