@@ -29,3 +29,11 @@ export REMOVE_CELLS_FOR_EQY   = sky130_fd_sc_hs__tapvpwrvgnd*
 export SYNTH_HIERARCHICAL = 1
 
 ```
+## Additional instructions can be given using the floorplan.tcl file (not necessary but may help)
+#IF using floorplan.tcl the file must exist in proper location to avoid any error
+
+```
+# Use custom congestion-aware floorplan
+# Add floorplan.tcl in the 'OpenROAD-flow-scripts/flow/designs/<platform>/<design>/floorplan.tcl' directory
+export ADDITIONAL_FLOORPLAN = $(DESIGN_DIR)/floorplan.tcl
+```
