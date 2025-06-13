@@ -4,7 +4,7 @@ import shutil
 import requests
 import re
 import json
-from PyQt6.QtWidgets import QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
+from PyQt6.QtWidgets import QLineEdit,QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
 from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
 from PyQt6.QtGui import QIcon
 
@@ -20,7 +20,7 @@ class SettingsWindow(QDialog):
 
     themes = []
 
-    def reposition(self,parent):
+    def reposition(self,parent=None):
         """Center the settings window relative to the main window."""
         parent_geometry = parent.geometry()
         x = parent_geometry.x() + (parent_geometry.width() - self.width()) // 2
@@ -137,22 +137,47 @@ class ColorBox(QLabel):
 
 # Widget to display log messages
 class LogWidget(QWidget):
-    def __init__(self):
+    def __init__(self,main_window):
         super().__init__()
+        self.main_window = main_window
+        self.log = main_window.log  # Reference to main app's log method
+
         # self.main_window = main_window
         self.layout = QVBoxLayout()
-        
         # Text area for log messages
         self.log_display = QTextEdit()
         self.log_display.setReadOnly(True)  # Make it read-only
         
         self.layout.addWidget(self.log_display)
-        self.setLayout(self.layout)
 
+        # Horizontal layout for input and button
+        # Input field and Run button
+        input_layout = QHBoxLayout()
+        self.input_box = QLineEdit()
+        self.reset_path_button = QPushButton("Reset Path")
+        input_layout.addWidget(self.input_box,9)
+        input_layout.addWidget(self.reset_path_button,1)
+
+        self.layout.addLayout(input_layout)
+
+        #ColorBox
         self.indicator = ColorBox()
         self.layout.addWidget(self.indicator)
         self.setLayout(self.layout)
 
+        # Connect the Run button
+        self.input_box.returnPressed.connect(self.handle_run_clicked)
+        self.reset_path_button.clicked.connect(self.handle_reset_clicked)
+
+    def handle_run_clicked(self):
+        cmd = self.input_box.text().strip()
+        self.main_window.run(cmd)
+        self.input_box.clear()
+
+    def handle_reset_clicked(self):
+        cmd = self.input_box.text().strip()
+        self.main_window.run("cd "+self.main_window.path)
+        
 
         
     # Method to append log messages
@@ -282,6 +307,12 @@ class ConfigWidget(QWidget):
         self.openGui_button = QPushButton("OpenROAD Gui")
         self.openGui_button.clicked.connect(self.openGui)
         self.openGui_button.setToolTip("Open Generated GDSII File")
+        self.layout.addWidget(self.openGui_button)
+
+        # Run make clean
+        self.openGui_button = QPushButton("Make clean")
+        self.openGui_button.clicked.connect(self.makeClean)
+        self.openGui_button.setToolTip("Reset files")
         self.layout.addWidget(self.openGui_button)
         
         # Edit File Area
@@ -517,6 +548,13 @@ class ConfigWidget(QWidget):
         else:
             self.log("NOT UBUNTU")
 
+    def makeClean(self):
+        if self.is_ubuntu():
+            self.main_window.run(command('make clean'))
+            self.log("make clean")
+        else:
+            self.log("NOT UBUNTU")
+
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
 
@@ -572,15 +610,12 @@ class SimpleMainWindow(QMainWindow):
         
 
         # Log widget to display application logs
-        self.log_widget = LogWidget()
+        #LEFT
+        self.log_widget = LogWidget(self)
         self.splitter.addWidget(self.log_widget)
-
-        # #Persistent Terminal
-        # self.output = QTextEdit(self)
-        # self.output.setReadOnly(True)
-        # self.layout.addWidget(self.output)
         
-        # Config widget
+        # Config widget where most of the buttons exist
+        #RIGHT
         self.config_widget = ConfigWidget(self)
         self.splitter.addWidget(self.config_widget)
         
@@ -591,17 +626,46 @@ class SimpleMainWindow(QMainWindow):
         self.log("Application started.")  # Log initial message
         # self.log("Path is "+ self.path)  # Log initial message
 
+    def is_ubuntu(self):
+        try:
+            # with open("/etc/os-release") as f:
+            #     return any("ubuntu" in line.lower() for line in f)
+            with open("/etc/os-release") as f:
+                content = f.read().lower()  # Read all content and convert to lowercase
+
+                if "ubuntu" in content:
+                    return "Ubuntu"
+                elif "centos" in content:
+                    return "CentOS"
+                elif "debian" in content:
+                    return "Debian"
+                else:
+                    return "Unknown Linux distribution"
+        except FileNotFoundError:
+            return False
+
     def run(self, cmd ):
-        """Send a command to the persistent shell"""
-        if cmd:     #self.run_command(cmd = "ls")
-            self.log_widget.indicator.setColor("red")
 
-            #Wrapper to encase the command into
-            wrapper = f"{cmd};echo {self.marker}\n"
+        if not(self.is_ubuntu() == False):
+            """Send a command to the persistent shell"""
+            if cmd:     #self.run_command(cmd = "ls")
+                self.log_widget.indicator.setColor("red")
 
-            self.process.write((wrapper).encode())
-            if not self.process.waitForStarted():
-                self.log("Failed to start the process.")
+                #Wrapper to encase the command into
+                wrapper = f"{cmd};echo {self.marker}\n"
+
+                self.process.write((wrapper).encode())
+                if not self.process.waitForStarted():
+                    error_type = self.process.error()             # e.g., QProcess.FailedToStart
+                    error_string = self.process.errorString()     # e.g., "Process failed to start"
+                    
+                    self.log("Error Occured")
+                    self.log(f"Error type: {error_type}")
+                    self.log(f"Error details: {error_string}")
+                    
+                    self.log_widget.indicator.setColor("lime")
+        else:
+            self.log("Windows cannot run bash commands")
     
     def read_output(self):
         # def strip_ansi_codes(text):
