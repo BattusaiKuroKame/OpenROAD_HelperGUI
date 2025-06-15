@@ -646,7 +646,7 @@ class SimpleMainWindow(QMainWindow):
         if not(self.is_ubuntu() == False):
             """Send a command to the persistent shell"""
             if cmd:     #self.run_command(cmd = "ls")
-                self.log_widget.indicator.setColor("red")
+                # self.log_widget.indicator.setColor("red")
 
                 #Wrapper to encase the command into
                 wrapper = f"{cmd}\n"
@@ -660,7 +660,7 @@ class SimpleMainWindow(QMainWindow):
                     self.log(f"Error type: {error_type}")
                     self.log(f"Error details: {error_string}")
                     
-                    self.log_widget.indicator.setColor("lime")
+                    # self.log_widget.indicator.setColor("lime")
         else:
             self.log("Windows cannot run bash commands")
     
