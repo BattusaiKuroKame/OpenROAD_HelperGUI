@@ -5,7 +5,7 @@ import requests
 import re
 import json
 from PyQt6.QtWidgets import QLineEdit,QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
-from PyQt6.QtCore import Qt,QProcess  # Import Qt for alignment
+from PyQt6.QtCore import Qt,QProcess,QProcessEnvironment  # Import Qt for alignment
 from PyQt6.QtGui import QIcon
 
 filepath = ""
@@ -169,14 +169,14 @@ class LogWidget(QWidget):
         self.input_box.returnPressed.connect(self.handle_run_clicked)
         self.reset_path_button.clicked.connect(self.handle_reset_clicked)
 
-    def handle_run_clicked(self):
+    def handle_run_clicked(self,):
         cmd = self.input_box.text().strip()
         self.main_window.run(cmd)
         self.input_box.clear()
 
     def handle_reset_clicked(self):
-        cmd = self.input_box.text().strip()
-        self.main_window.run("cd "+self.main_window.path)
+        cmd = "cd "+ self.main_window.path
+        self.main_window.run(cmd)
         
 
         
@@ -398,14 +398,7 @@ class ConfigWidget(QWidget):
     def source_env(self):
         # self.log("Source Env button clicked")
         if self.is_ubuntu():
-
-            # result = subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
-            # if result.returncode == 0:
-            #     self.log(f"Sourced .env file successfully: {result.stdout}")
-            # else:
-            #     self.log(f"Failed to source .env file: {result.stderr}")
-            self.main_window.run("cd .. && source ./env.sh && cd OpenROAD_HelperGUI && echo 'Env sourced'")
-            # subprocess.run(["bash", "-i", "-c", "cd .. && source ./env.sh && cd flow && echo 'Env sourced'"],capture_output=True, text=True)
+            self.main_window.run("cd .. && source ./env.sh && cd OpenROAD_HelperGUI")
         else:
             self.log("NOT UBUNTU")
             # self.log(self.main_window.path)
@@ -582,14 +575,18 @@ class ConfigWidget(QWidget):
 # Main application window
 class SimpleMainWindow(QMainWindow):
 
+    path = ""
+
     def __init__(self):
 
         super().__init__()
         self.initUI()
         self.process = QProcess(self)  # Persistent shell process
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("TERM", "dumb")
+        self.process.setProcessEnvironment(env)
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        self.process.readyRead.connect(self.read_output)
-        self.marker = "##command_executed_successfully$$"
+        self.process.readyReadStandardOutput.connect(self.read_output)
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.log("Current Directory:\n"+self.path)
 
@@ -645,14 +642,13 @@ class SimpleMainWindow(QMainWindow):
             return False
 
     def run(self, cmd ):
-
         if not(self.is_ubuntu() == False):
             """Send a command to the persistent shell"""
             if cmd:     #self.run_command(cmd = "ls")
                 self.log_widget.indicator.setColor("red")
 
                 #Wrapper to encase the command into
-                wrapper = f"{cmd};echo {self.marker}\n"
+                wrapper = f"{cmd}\n\n"
 
                 self.process.write((wrapper).encode())
                 if not self.process.waitForStarted():
@@ -668,24 +664,22 @@ class SimpleMainWindow(QMainWindow):
             self.log("Windows cannot run bash commands")
     
     def read_output(self):
-        # def strip_ansi_codes(text):
-        #     """Removes ANSI escape sequences from shell output."""
-        #     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-        #     return ansi_escape.sub('', text)
-
-
         """Read the output from the shell and clean it."""
-        # output = self.process.readAllStandardOutput().data().decode()
         output = self.process.readAllStandardOutput().data().decode()
-        # clean_output = strip_ansi_codes(output)  # Remove ANSI codes
 
-        if output.endswith("$ "):#(self.marker in output) or "OpenROAD_HelperGUI" in output:
+        if output.endswith("$ "):
             self.log_widget.indicator.setColor("lime")#"green")
-            # if not(output.endswith("$ ")):
-            #     self.log(output+"\n")
         else:
             self.log_widget.indicator.setColor("red")
-            self.log(output+"\n")
+
+        def filter_prompt_lines(output):
+            lines = output.splitlines(keepends=True)  # Keep '\n'
+            if lines:
+                lines.pop()
+            return "".join(lines)
+
+        
+        self.log(""+filter_prompt_lines(output)+"\n")
     
     # Method to log messages to the log widget
     def log(self, message):
