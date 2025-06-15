@@ -176,8 +176,9 @@ class LogWidget(QWidget):
 
     def handle_reset_clicked(self):
         cmd = "cd "+ self.main_window.path
-        self.main_window.log("Returning to "+ self.main_window.path)
         self.main_window.run(cmd)
+        self.main_window.log("Returning to "+ self.main_window.path)
+        
         
 
         
@@ -399,7 +400,7 @@ class ConfigWidget(QWidget):
     def source_env(self):
         # self.log("Source Env button clicked")
         if self.is_ubuntu():
-            self.main_window.run("cd .. && source ./env.sh && cd OpenROAD_HelperGUI")
+            self.srun("cd .. && source ./env.sh && cd OpenROAD_HelperGUI")
         else:
             self.log("NOT UBUNTU")
             # self.log(self.main_window.path)
@@ -522,32 +523,34 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
-            # self.main_window.run('make')
             if self.imported_design and self.pdk:
                 temp = f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}'
                 self.main_window.log(temp)
-                self.main_window.run(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
+                self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
                 self.log("Running make...")
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.main_window.run('make')
+                self.srun('make')
         else:
             self.log("NOT UBUNTU")
 
     def openGui(self):
         if self.is_ubuntu():
-            self.main_window.run(command('make gui_final'))
+            self.srun('make gui_final')
             self.log("Opening OpenROAD GUI")
         else:
             self.log("NOT UBUNTU")
 
     def makeClean(self):
         if self.is_ubuntu():
-            self.main_window.run(command('make clean'))
+            self.srun('make clean')
             self.log("make clean")
         else:
             self.log("NOT UBUNTU")
+    def srun(self,cmd):#safe run after coming back to app directory
+        self.main_window.run("cd "+ self.main_window.path)
+        self.main_window.run(command(cmd))
 
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
