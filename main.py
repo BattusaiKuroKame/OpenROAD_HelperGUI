@@ -176,6 +176,7 @@ class LogWidget(QWidget):
 
     def handle_reset_clicked(self):
         cmd = "cd "+ self.main_window.path
+        self.main_window.log("Returning to "+ self.main_window.path)
         self.main_window.run(cmd)
         
 
@@ -648,7 +649,7 @@ class SimpleMainWindow(QMainWindow):
                 self.log_widget.indicator.setColor("red")
 
                 #Wrapper to encase the command into
-                wrapper = f"{cmd}\n\n"
+                wrapper = f"{cmd}\n"
 
                 self.process.write((wrapper).encode())
                 if not self.process.waitForStarted():
@@ -672,18 +673,19 @@ class SimpleMainWindow(QMainWindow):
         else:
             self.log_widget.indicator.setColor("red")
 
-        def filter_prompt_lines(output):
-            lines = output.splitlines(keepends=True)  # Keep '\n'
-            if lines:
-                lines.pop()
-            return "".join(lines)
-
-        
-        self.log(""+filter_prompt_lines(output)+"\n")
+        lines = output.splitlines()  # Keep '\n'
+        for line in lines:
+            if line.endswith("$ "):
+                self.log(line,col='lime')
+            else:
+                self.log(line,col=None)    
     
     # Method to log messages to the log widget
-    def log(self, message):
-        self.log_widget.append_log(message)
+    def log(self, message,col=None):
+        if col:
+            self.log_widget.append_log(f'<span style="color:{col};">{message}</span>')
+        else:
+            self.log_widget.append_log(message)
 
 # Entry point of the application
 if __name__ == "__main__":
