@@ -678,7 +678,12 @@ class SimpleMainWindow(QMainWindow):
             if line.endswith("$ "):
                 self.log(line,col='lime')
             else:
-                self.log(line,col=None)    
+                words = ['error', 'Error', 'fail','Failed']
+
+                if any(word in line for word in words):
+                    self.log(line,col='red')
+                else:
+                    self.log(line,col=None)
     
     # Method to log messages to the log widget
     def log(self, message,col=None):
