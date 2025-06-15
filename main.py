@@ -676,7 +676,7 @@ class SimpleMainWindow(QMainWindow):
         lines = output.splitlines()  # Keep '\n'
         for line in lines:
             if line.endswith("$ "):
-                self.log(line,col='lime')
+                self.log(line,col='cyan')# 'lightblue' 'lime' 'blue'
             else:
                 words = ['error', 'Error', 'fail','Failed']
 
