@@ -22,7 +22,7 @@ Before using this GUI, ensure the following dependencies are installed:
    ```
    sudo apt update && sudo apt upgrade -y
    ```
-4. **Python 3.x** and **PyQt6** for the GUI:
+4. **Requests** , **Python 3.x** and **PyQt6** for the GUI:
 
    ```bash
    sudo apt install -y python3 python3-pip && pip install --upgrade pip && pip install PyQt6 && pip install requests
