@@ -154,6 +154,7 @@ class LogWidget(QWidget):
         # Input field and Run button
         input_layout = QHBoxLayout()
         self.input_box = QLineEdit()
+        self.input_box.setPlaceholderText("Write Terminal Commands here...")
         self.reset_path_button = QPushButton("Reset Path")
         input_layout.addWidget(self.input_box,9)
         input_layout.addWidget(self.reset_path_button,1)
