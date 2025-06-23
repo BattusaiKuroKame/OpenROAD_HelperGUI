@@ -9,5 +9,5 @@
             "data": "QWidget { background-color: #f8f8f8; color: black; } QPushButton { background-color: #e0e0e0; color: black; border: 1px solid #bbbbbb; } QPushButton:hover { background-color: #d6d6d6; } QComboBox { background-color: #ffffff; color: black; border: 1px solid #bbbbbb; } QToolButton { background-color: #e0e0e0; color: black; border: 1px solid #bbbbbb; padding: 4px 8px; } QToolButton:hover { background-color: #d6d6d6; }"
         }
     ],
-    "version": "v2.1.6"
+    "version": "v2.1.5"
 }
