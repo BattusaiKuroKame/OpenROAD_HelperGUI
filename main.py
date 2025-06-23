@@ -4,9 +4,9 @@ import shutil
 import requests
 import re
 import json
-from PyQt6.QtWidgets import QLineEdit,QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget
+from PyQt6.QtWidgets import QSizePolicy,QLineEdit,QApplication,QDialog,QFileDialog,QGraphicsDropShadowEffect, QMainWindow, QTextEdit, QSplitter, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QWidget,QToolButton, QMenu
 from PyQt6.QtCore import Qt,QProcess,QProcessEnvironment  # Import Qt for alignment
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QAction
 
 filepath = ""
 comStart = "cd .. && cd flow && "
@@ -29,9 +29,10 @@ class SettingsWindow(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        # self.parent=parent
         self.setWindowTitle("Settings")
         self.setGeometry(150, 150, 300, 200)
-
+        # parent.log(parent.data["version"])
         # self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         # self.setMinimumSize(200, 100)  # Set a reasonable minimum size
         # self.adjustSize()  # Adjust size dynamically
@@ -108,6 +109,7 @@ class SettingsWindow(QDialog):
         for el in self.themes:
             if el["name"] == theme:
                 self.parent().setStyleSheet(el["data"])
+                self.parent().activeStyle = el["data"]
 
         #Load Settings from file
         with open(filepath+"settings.json",'w+') as file:
@@ -117,8 +119,7 @@ class SettingsWindow(QDialog):
                 if el["name"] == theme:
                     sel = el
             self.themes.insert(0,self.themes.pop(self.themes.index(sel)))
-            # print(self.themes)
-            data = {}
+            data = self.parent().data
             data["themes"] = self.themes
             json.dump(data,file,indent=4)
         
@@ -294,10 +295,63 @@ class ConfigWidget(QWidget):
         self.main_window.log_widget.indicator.setColor("white")
         self.layout.addWidget(self.source_env_button)
         
-        #Run Make Button
-        self.run_make_button = QPushButton("Run Make")
-        self.run_make_button.clicked.connect(self.run_make)
-        self.run_make_button.setToolTip("Run the make command")
+        # #Run Make Button
+        # self.run_make_button = QPushButton("Run Make")
+        # self.run_make_button.clicked.connect(lambda: self.run_make_step(step=""))
+        # self.run_make_button.setToolTip("Run the make command")
+        # self.layout.addWidget(self.run_make_button)
+
+        # Make Tool button with menu
+        self.run_make_button = QToolButton()
+        self.run_make_button.setText("Run All make steps")
+        # self.run_make_button.setStyleSheet(self.main_window.activeStyle)
+        self.run_make_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.run_make_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
+        # self.run_make_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)  # Optional: if using dropdown
+        self.run_make_button.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
+        # Make it expand to fill available width
+        self.run_make_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+        # Create dropdown menu
+        menu = QMenu()
+
+        # Create actions
+        step1 = QAction("Synthesis", self)
+        step2 = QAction("Floorplanning", self)
+        step3 = QAction("Placement", self)
+        step4 = QAction("CTS (Clock Tree)", self)
+        step5 = QAction("Routing", self)
+        step6 = QAction("GDSII Generation", self)
+        step7 = QAction("SPEF Extraction", self)
+        step8 = QAction("DRC", self)
+        step9 = QAction("LVS Checks", self)
+        step10 = QAction("Final Reports", self)
+
+        step1.triggered.connect(lambda: self.run_make_step("make synth"))
+        step2.triggered.connect(lambda: self.run_make_step("make floorplan"))
+        step3.triggered.connect(lambda: self.run_make_step("make place"))
+        step4.triggered.connect(lambda: self.run_make_step("make cts"))
+        step5.triggered.connect(lambda: self.run_make_step("make route"))
+        step6.triggered.connect(lambda: self.run_make_step("make gds"))
+        step7.triggered.connect(lambda: self.run_make_step("make spef"))
+        step8.triggered.connect(lambda: self.run_make_step("make drc"))
+        step9.triggered.connect(lambda: self.run_make_step("make lvs"))
+        step10.triggered.connect(lambda: self.run_make_step("make report"))
+
+        # Add actions to menu
+        menu.addAction(step1)
+        menu.addAction(step2)
+        menu.addAction(step3)
+        menu.addAction(step4)
+        menu.addAction(step5)
+        menu.addAction(step6)
+        menu.addAction(step7)
+        menu.addAction(step8)
+        menu.addAction(step9)
+        menu.addAction(step10)
+
+        self.run_make_button.setMenu(menu)
+        self.run_make_button.clicked.connect(lambda: self.run_make_step(step=""))
         self.layout.addWidget(self.run_make_button)
 
         # Set Makefile Button
@@ -520,7 +574,8 @@ class ConfigWidget(QWidget):
         else:
             self.log("No design has been imported yet.")
     
-    def run_make(self):
+    
+    def run_make_step(self,step=""):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
@@ -532,7 +587,7 @@ class ConfigWidget(QWidget):
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.srun('make')
+                self.srun('make'+step)
         else:
             self.log("NOT UBUNTU")
 
@@ -582,9 +637,11 @@ class SimpleMainWindow(QMainWindow):
 
     path = ""
 
-    def __init__(self):
+    def __init__(self,data,activeStyle):
+        self.data = data
 
         super().__init__()
+        self.activeStyle = activeStyle
         self.initUI()
         self.process = QProcess(self)  # Persistent shell process
         env = QProcessEnvironment.systemEnvironment()
@@ -704,6 +761,6 @@ if __name__ == "__main__":
         themes = data["themes"]
         last_theme = themes[0]["data"]
     app.setStyleSheet(last_theme)#dark_stylesheet)
-    window = SimpleMainWindow()
+    window = SimpleMainWindow(data,last_theme)
     window.show()
     sys.exit(app.exec())
