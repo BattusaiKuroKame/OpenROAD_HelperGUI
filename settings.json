@@ -2,13 +2,12 @@
     "themes": [
         {
             "name": "Dark",
-            "data": "\n            QWidget {\n                background-color: #2e2e2e;\n                color: white;\n            }\n            QPushButton {\n                background-color: #444444;\n                color: white;\n                border: 1px solid #888888;\n            }\n            QPushButton:hover {\n                background-color: #555555;\n            }\n        "
+            "data": "QWidget { background-color: #2e2e2e; color: white; } QPushButton { background-color: #444444; color: white; border: 1px solid #888888; } QPushButton:hover { background-color: #555555; } QToolButton { background-color: #444444; color: white; border: 1px solid #888888; padding: 4px 8px; } QToolButton:hover { background-color: #555555; }"
         },
         {
             "name": "Light",
-            "data": "\n                QWidget {\n                    background-color: #f8f8f8;\n                    color: black;\n                }\n                QPushButton {\n                    background-color: #e0e0e0;\n                    color: black;\n                    border: 1px solid #bbbbbb;\n                }\n                QPushButton:hover {\n                    background-color: #d6d6d6;\n                }\n                QComboBox {\n                    background-color: #ffffff;\n                    color: black;\n                    border: 1px solid #bbbbbb;\n                }\n            "
+            "data": "QWidget { background-color: #f8f8f8; color: black; } QPushButton { background-color: #e0e0e0; color: black; border: 1px solid #bbbbbb; } QPushButton:hover { background-color: #d6d6d6; } QComboBox { background-color: #ffffff; color: black; border: 1px solid #bbbbbb; } QToolButton { background-color: #e0e0e0; color: black; border: 1px solid #bbbbbb; padding: 4px 8px; } QToolButton:hover { background-color: #d6d6d6; }"
         }
     ],
-
     "version": "v2.1.6"
 }
