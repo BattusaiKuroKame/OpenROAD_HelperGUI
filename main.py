@@ -10,8 +10,9 @@ from PyQt6.QtGui import QAction
 
 filepath = ""
 
-def decoText(message,col='white',fsize="100%",bold="normal",underline="none",italic="none"):
-    return f'<span style=\"color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};\">{message}</span>'
+def decoText(message,col="white",fsize="100%",bold="normal",underline="none",italic="none"):
+    # return f'<span style=\"color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};\">{message}</span>'
+    return f'<span style="color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};">{message}</span>'
 
 #Settings Window
 class SettingsWindow(QDialog):
@@ -265,7 +266,7 @@ class ConfigWidget(QWidget):
         config_layout = QHBoxLayout()
         self.config_button = QPushButton("config.mk")
         self.config_button.clicked.connect(lambda: self.edit_file("config.mk"))
-        self.config_button.setToolTip("Edit the config.mk File")
+        self.config_button.setToolTip("Edit the config.mk file")
 
         # self.reset_config_button = QPushButton("Reset config.mk")
         self.reset_config_button = QPushButton("↺")
@@ -499,7 +500,7 @@ class ConfigWidget(QWidget):
     def pdk_changed(self, text):
         # self.log(f"PDK changed to: {text}")
         self.pdk = text
-        self.main_window.log(f"PDK changedto: {self.pdk}")
+        self.main_window.log(decoText(f"PDK changed to: {self.pdk}",col='yellow',underline='underline'))
         # self.imported_design_label.setText(f"Imported Design: {self.imported_design}")
         
     
@@ -568,7 +569,7 @@ class ConfigWidget(QWidget):
 
             # shutil.copy("defaultConstraints.txt", f"{dest_pdk}/constraint.sdc")
             # shutil.copy("defaultConfig.txt", f"{dest_pdk}/config.mk")
-            self.log(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}")
+            self.log(decoText(f"Imported {self.imported_design} into {dest_pdk} and {dest_src}",col='yellow',underline='underline'))
     
     def reset_config(self):
         # self.log("Reset config.mk button clicked")
@@ -585,7 +586,7 @@ class ConfigWidget(QWidget):
 
             if self.current_file == f"../flow/designs/{selected_pdk}/{self.imported_design}/config.mk":
                 self.edit_file("config.mk")
-            self.log("Reset config.mk")
+            self.log(decoText("Reset config.mk",col='yellow',underline='underline'))
         else:
             if os.path.exists(path):
                 self.log("SELECT DESIGN AND PDK FIRST")
@@ -607,7 +608,7 @@ class ConfigWidget(QWidget):
 
             if self.current_file == f"../flow/designs/{selected_pdk}/{self.imported_design}/constraint.sdc":
                 self.edit_file("constraint.sdc")
-            self.log("Reset constraint.sdc")
+            self.log(decoText("Reset constraint.sdc",col='yellow',underline='underline'))
         else:
             if os.path.exists(path):
                 self.log("SELECT DESIGN AND PDK FIRST")
@@ -622,7 +623,7 @@ class ConfigWidget(QWidget):
                 makefile_data = file.read().replace("DESIGN_CONFIG ?= ./designs/nangate45/gcd/config.mk", "DESIGN_CONFIG ?= ./designs/"+self.pdk_dropdown.currentText()+"/"+self.imported_design+"/config.mk")
             with open(path+"Makefile", "w") as file:
                 file.write(makefile_data)
-            self.log("Makefile updated")
+            self.log(decoText("Makefile updated",col='yellow',underline='underline'))
         else:
             self.log("No design has been imported yet.")
     
@@ -631,14 +632,14 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
-            temp = f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}'
+            temp = f'\nMAKE {step}\nDesign: {self.imported_design}\n PDK: {self.pdk}'
             if self.imported_design and self.pdk:
                 self.main_window.log(temp)
                 self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"') 
+                self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{decoText(temp,col="yellow",underline="underline")}"') 
             self.log(decoText(f"Running make {step}...",col='yellow',underline='underline'))
         else:
             self.log("NOT UBUNTU")
@@ -646,7 +647,7 @@ class ConfigWidget(QWidget):
     def openGui(self):
         if self.is_ubuntu():
             self.srun('cd .. && cd flow && make gui_final && cd .. && cd OpenROAD_HelperGUI')
-            self.log("Opening OpenROAD GUI")
+            self.log(decoText("Opening OpenROAD GUI",col='yellow',underline='underline'))
         else:
             self.log("NOT UBUNTU")
 
@@ -673,7 +674,7 @@ class ConfigWidget(QWidget):
                 self.text_edit.setVisible(True)
                 self.save_button.setVisible(True)
         else:
-            self.log("SELECT DESIGN AND PDK FIRST")
+            self.log(decoText("SELECT DESIGN AND PDK FIRST",col='red',underline='underline',bold='bold'))
     
     def save_file(self):
 
@@ -682,7 +683,7 @@ class ConfigWidget(QWidget):
                 file.write(self.text_edit.toPlainText())
             self.text_edit.setVisible(False)
             self.save_button.setVisible(False)
-            self.log(f"Saved {self.current_file}")
+            self.log(decoText(f"Saved {self.current_file}",col='yellow',underline='underline'))
         
 # Main application window
 class SimpleMainWindow(QMainWindow):
