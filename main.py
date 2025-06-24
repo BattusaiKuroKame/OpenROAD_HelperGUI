@@ -10,6 +10,9 @@ from PyQt6.QtGui import QAction
 
 filepath = ""
 
+def decoText(message,col='white',fsize="100%",bold="normal",underline="none",italic="none"):
+    return f'<span style=\"color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};\">{message}</span>'
+
 #Settings Window
 class SettingsWindow(QDialog):
 
@@ -99,7 +102,7 @@ class SettingsWindow(QDialog):
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
         # self.parent().log(f"cd .. && {command}")
         # self.parent().log("\nRESTART APP AFTER UPDATING...\n")
-        self.srun(f"cd .. && {command} && echo '' && echo '' && echo '<span style=\"color:yellow;font-size: 20pt; font-weight: bold;\">RESTART APP</span>'")
+        self.srun(f"cd .. && {command} && echo '' && echo '' && echo {decoText('RESTART APP',col='yellow',fsize='200%',bold='bold')}")
         # self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
         # self.parent().restart_app()
 
@@ -392,18 +395,20 @@ class ConfigWidget(QWidget):
         menu_clean = QMenu()
 
         # Create actions
-        step_clean1 = QAction("standard clean", self)
-        step_clean2 = QAction("clean logs", self)
-        step_clean3 = QAction("clean results", self)
-        step_clean4 = QAction("clean reports", self)
-        step_clean5 = QAction("clean runs", self)
+        step_clean1 = QAction("clean_synth ", self)
+        step_clean2 = QAction("clean_floorplan", self)
+        step_clean3 = QAction("clean_place", self)
+        step_clean4 = QAction("clean_cts", self)
+        step_clean5 = QAction("clean_route", self)
+        step_clean6 = QAction("clean_finish", self)
 
 
-        step_clean1.triggered.connect(lambda: self.run_make_step("clean"))
-        step_clean2.triggered.connect(lambda: self.run_make_step("clean_logs"))
-        step_clean3.triggered.connect(lambda: self.run_make_step("clean_results"))
-        step_clean4.triggered.connect(lambda: self.run_make_step("clean_reports"))
-        step_clean5.triggered.connect(lambda: self.run_make_step("clean_runs"))
+        step_clean1.triggered.connect(lambda: self.run_make_step("clean_synth"))
+        step_clean2.triggered.connect(lambda: self.run_make_step("clean_floorplan"))
+        step_clean3.triggered.connect(lambda: self.run_make_step("clean_place"))
+        step_clean4.triggered.connect(lambda: self.run_make_step("clean_cts"))
+        step_clean5.triggered.connect(lambda: self.run_make_step("clean_route"))
+        step_clean6.triggered.connect(lambda: self.run_make_step("clean_finish"))
 
         # Add actions to menu
         menu_clean.addAction(step_clean1)
@@ -411,6 +416,7 @@ class ConfigWidget(QWidget):
         menu_clean.addAction(step_clean3)
         menu_clean.addAction(step_clean4)
         menu_clean.addAction(step_clean5)
+        menu_clean.addAction(step_clean6)
 
 
         self.run_make_clean_button.setMenu(menu_clean)
@@ -501,6 +507,7 @@ class ConfigWidget(QWidget):
         # self.log("Source Env button clicked")
         if self.is_ubuntu():
             self.srun("cd .. && source ./env.sh && cd OpenROAD_HelperGUI")
+            self.log(decoText(".env sourcing",col='yellow',underline='underline'))
         else:
             self.log("NOT UBUNTU")
             # self.log(self.main_window.path)
@@ -632,7 +639,7 @@ class ConfigWidget(QWidget):
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
                 self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"') 
-            self.log(f"Running make {step}...")
+            self.log(decoText(f"Running make {step}...",col='yellow',underline='underline'))
         else:
             self.log("NOT UBUNTU")
 
@@ -787,7 +794,7 @@ class SimpleMainWindow(QMainWindow):
         lines = output.splitlines()  # Keep '\n'
         for line in lines:
             if line.endswith("$ "):
-                self.log(line,col='cyan')# 'lightblue' 'lime' 'blue'
+                self.log(decoText(line,col='cyan',bold='bold'))# 'lightblue' 'lime' 'blue'
             else:
                 words = ['error', 'Error', 'fail','Failed']
 
