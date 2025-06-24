@@ -403,11 +403,11 @@ class ConfigWidget(QWidget):
         step_clean5.triggered.connect(lambda: self.run_make_step("clean_runs"))
 
         # Add actions to menu
-        menu_clean.addAction(step1)
-        menu_clean.addAction(step2)
-        menu_clean.addAction(step3)
-        menu_clean.addAction(step4)
-        menu_clean.addAction(step5)
+        menu_clean.addAction(step_clean1)
+        menu_clean.addAction(step_clean2)
+        menu_clean.addAction(step_clean3)
+        menu_clean.addAction(step_clean4)
+        menu_clean.addAction(step_clean5)
 
 
         self.run_make_clean_button.setMenu(menu_clean)
@@ -629,7 +629,7 @@ class ConfigWidget(QWidget):
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.srun('make'+step) 
+                self.srun('make '+step) 
             self.log(f'\nmake {step}\n')
         else:
             self.log("NOT UBUNTU")
