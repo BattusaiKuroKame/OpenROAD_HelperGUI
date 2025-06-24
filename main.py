@@ -11,6 +11,7 @@ from PyQt6.QtGui import QAction
 filepath = ""
 
 def decoText(message,col="white",fsize="100%",bold="normal",underline="none",italic="none"):
+    message = message.replace('\n', '<br>')
     # return f'<span style=\"color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};\">{message}</span>'
     return f'<span style="color:{col};font-size: {fsize}; font-weight: {bold};text-decoration: {underline};font-style: {italic};">{message}</span>'
 
@@ -632,14 +633,18 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
-            temp = f"\nMAKE {step}\nDesign: {self.imported_design}\n PDK: {self.pdk}"
+            temp = f"\nMAKE {step}\nDesign: {self.imported_design}\nPDK: {self.pdk}"
+
+            self.log(decoText(temp,col='yellow',underline='underline'))
+            # print(decoText(temp,col='yellow',underline='underline'))
+
             if self.imported_design and self.pdk:
                 self.main_window.log(temp)
                 self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo {temp}')
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
-                self.main_window.log('\nDEFAULT MAKE')
-                self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{decoText(temp,col="yellow",underline="underline")}"') 
+                self.main_window.log(decoText('\nDEFAULT design',col='yellow',underline='underline'))
+                self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI')
             self.log(decoText(f"Running make {step}...",col='yellow',underline='underline'))
         else:
             self.log("NOT UBUNTU")
