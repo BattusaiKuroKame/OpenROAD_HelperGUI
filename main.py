@@ -632,10 +632,10 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
-            temp = f'\nMAKE {step}\nDesign: {self.imported_design}\n PDK: {self.pdk}'
+            temp = f"\nMAKE {step}\nDesign: {self.imported_design}\n PDK: {self.pdk}"
             if self.imported_design and self.pdk:
                 self.main_window.log(temp)
-                self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
+                self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo {temp}')
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
