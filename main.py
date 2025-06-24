@@ -9,11 +9,6 @@ from PyQt6.QtCore import Qt,QProcess,QProcessEnvironment  # Import Qt for alignm
 from PyQt6.QtGui import QAction
 
 filepath = ""
-comStart = "cd .. && cd flow && "
-comEnd = "&& cd .. && cd OpenROAD_HelperGUI"
-
-def command(command:str):
-    return comStart + command + comEnd
 
 #Settings Window
 class SettingsWindow(QDialog):
@@ -22,7 +17,7 @@ class SettingsWindow(QDialog):
 
     def srun(self,cmd):#safe run after coming back to app directory
         self.parent().run("cd "+ self.parent().path)
-        self.parent().run(command(cmd))
+        self.parent().run(cmd)
 
     def reposition(self,parent=None):
         """Center the settings window relative to the main window."""
@@ -83,7 +78,7 @@ class SettingsWindow(QDialog):
         # self.apply_button = QPushButton("Apply")
         # self.apply_button.clicked.connect(self.apply_settings)
 
-        self.update_button = QPushButton("Display Update Command")
+        self.update_button = QPushButton("Update")
         self.update_button.clicked.connect(self.updateGUI)
         self.update_button.setToolTip("Update to latest version")
         layout.addWidget(self.update_button)
@@ -613,7 +608,7 @@ class ConfigWidget(QWidget):
             self.log("NOT UBUNTU")
     def srun(self,cmd):#safe run after coming back to app directory
         self.main_window.run("cd "+ self.main_window.path)
-        self.main_window.run(command(cmd))
+        self.main_window.run(cmd)
 
     def edit_file(self, file_name):
         selected_pdk = self.pdk_dropdown.currentText()
