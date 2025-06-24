@@ -674,7 +674,7 @@ class ConfigWidget(QWidget):
                 self.text_edit.setVisible(True)
                 self.save_button.setVisible(True)
         else:
-            self.log(decoText("SELECT DESIGN AND PDK FIRST",col='red',underline='underline',bold='bold'))
+            self.log(decoText("SELECT DESIGN AND PDK FIRST",col='orange',underline='underline',bold='bold'))
     
     def save_file(self):
 
