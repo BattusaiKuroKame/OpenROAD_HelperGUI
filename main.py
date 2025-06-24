@@ -376,7 +376,7 @@ class ConfigWidget(QWidget):
         # self.layout.addWidget(self.openGui_button)
 
         self.run_make_clean_button = QToolButton()
-        self.run_make_clean_button.setText("Run clean_all steps")
+        self.run_make_clean_button.setText("Run standard clean")
         # self.run_make_clean_button.setStyleSheet(self.main_window.activeStyle)
         self.run_make_clean_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
         self.run_make_clean_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
