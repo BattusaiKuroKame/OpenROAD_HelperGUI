@@ -19,6 +19,7 @@ class SettingsWindow(QDialog):
         self.parent().run("cd "+ self.parent().path)
         self.parent().run(cmd)
 
+
     def reposition(self,parent=None):
         """Center the settings window relative to the main window."""
         parent_geometry = parent.geometry()
@@ -98,7 +99,7 @@ class SettingsWindow(QDialog):
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
         # self.parent().log(f"cd .. && {command}")
         # self.parent().log("\nRESTART APP AFTER UPDATING...\n")
-        self.srun(f"cd .. && {command} && echo '' && echo '' && echo 'RESTART APP'")
+        self.srun(f"cd .. && {command} && echo '' && echo '' && echo '<span style=\"color:yellow;\">RESTART APP</span>'")
         # self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
         # self.parent().restart_app()
 
