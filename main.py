@@ -368,10 +368,49 @@ class ConfigWidget(QWidget):
         self.layout.addWidget(self.openGui_button)
 
         # Run make clean
-        self.openGui_button = QPushButton("Make clean")
-        self.openGui_button.clicked.connect(self.makeClean)
-        self.openGui_button.setToolTip("Reset files")
-        self.layout.addWidget(self.openGui_button)
+        # self.openGui_button = QPushButton("Make clean")
+        # self.openGui_button.clicked.connect(self.makeClean)
+        # self.openGui_button.setToolTip("Reset files")
+        # self.layout.addWidget(self.openGui_button)
+
+        self.run_make_clean_button = QToolButton()
+        self.run_make_clean_button.setText("Run All make steps")
+        # self.run_make_clean_button.setStyleSheet(self.main_window.activeStyle)
+        self.run_make_clean_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.run_make_clean_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
+        # self.run_make_clean_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)  # Optional: if using dropdown
+        self.run_make_clean_button.setPopupMode(QToolButton.ToolButtonPopupMode.MenuButtonPopup)
+        # Make it expand to fill available width
+        self.run_make_clean_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+        # Create dropdown menu
+        menu_clean = QMenu()
+
+        # Create actions
+        step_clean1 = QAction("Synthesis", self)
+        step_clean2 = QAction("Floorplanning", self)
+        step_clean3 = QAction("Placement", self)
+        step_clean4 = QAction("CTS (Clock Tree)", self)
+        step_clean5 = QAction("Routing", self)
+
+
+        step_clean1.triggered.connect(lambda: self.run_make_step("clean_all"))
+        step_clean2.triggered.connect(lambda: self.run_make_step("clean_logs"))
+        step_clean3.triggered.connect(lambda: self.run_make_step("clean_results"))
+        step_clean4.triggered.connect(lambda: self.run_make_step("clean_reports"))
+        step_clean5.triggered.connect(lambda: self.run_make_step("clean_runs"))
+
+        # Add actions to menu
+        menu_clean.addAction(step1)
+        menu_clean.addAction(step2)
+        menu_clean.addAction(step3)
+        menu_clean.addAction(step4)
+        menu_clean.addAction(step5)
+
+
+        self.run_make_clean_button.setMenu(menu_clean)
+        self.run_make_clean_button.clicked.connect(lambda: self.run_make_step(step=""))
+        self.layout.addWidget(self.run_make_clean_button)
         
         # Edit File Area
         self.text_edit = QTextEdit()
