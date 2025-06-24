@@ -633,7 +633,7 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
-            temp = f"\nMAKE {step}\nDesign: {self.imported_design}\nPDK: {self.pdk}"
+            temp = f"\nDesign: {self.imported_design}\nPDK: {self.pdk}"
 
             self.log(decoText(temp,col='yellow',underline='underline'))
             # print(decoText(temp,col='yellow',underline='underline'))
