@@ -20,6 +20,10 @@ class SettingsWindow(QDialog):
 
     themes = []
 
+    def srun(self,cmd):#safe run after coming back to app directory
+        self.parent().run("cd "+ self.parent().path)
+        self.parent().run(command(cmd))
+
     def reposition(self,parent=None):
         """Center the settings window relative to the main window."""
         parent_geometry = parent.geometry()
@@ -97,8 +101,10 @@ class SettingsWindow(QDialog):
         # self.parent().log("UPDATED")
 
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
-
+        self.parent().log(f"cd .. && {command}")
+        self.srun(f"cd .. && {command}")
         self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
+        # self.parent().restart_app()
 
 
 
@@ -587,7 +593,8 @@ class ConfigWidget(QWidget):
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.srun('make'+step)
+                self.srun('make'+step) 
+            self.log(f'\nmake {step}\n')
         else:
             self.log("NOT UBUNTU")
 
@@ -636,6 +643,11 @@ class ConfigWidget(QWidget):
 class SimpleMainWindow(QMainWindow):
 
     path = ""
+
+    def restart_app(self):
+        print("Restarting...")
+        python = sys.executable
+        os.execl(python, python, *sys.argv)  # Relaunch with same args
 
     def __init__(self,data,activeStyle):
         self.data = data
