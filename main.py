@@ -260,9 +260,9 @@ class ConfigWidget(QWidget):
         
         # Config Buttons (Edit & Reset in same row)
         config_layout = QHBoxLayout()
-        self.config_button = QPushButton("Edit config.mk")
+        self.config_button = QPushButton("config.mk")
         self.config_button.clicked.connect(lambda: self.edit_file("config.mk"))
-        self.config_button.setToolTip("Edit the Config File")
+        self.config_button.setToolTip("Edit the config.mk File")
 
         # self.reset_config_button = QPushButton("Reset config.mk")
         self.reset_config_button = QPushButton("↺")
@@ -275,7 +275,8 @@ class ConfigWidget(QWidget):
         
         # Constraints Buttons (Edit & Reset in same row)
         constraints_layout = QHBoxLayout()
-        self.constraints_button = QPushButton("Edit constraint.sdc")
+        self.constraints_button = QPushButton("constraint.sdc")
+        self.constraints_button.setToolTip('Edit constraint.sdc file')
         self.constraints_button.clicked.connect(lambda: self.edit_file("constraint.sdc"))
 
         self.reset_constraint_button = QPushButton("↺")
@@ -306,7 +307,8 @@ class ConfigWidget(QWidget):
 
         # Make Tool button with menu
         self.run_make_button = QToolButton()
-        self.run_make_button.setText("Run All make steps")
+        self.run_make_button.setToolTip('Run all the steps in RTL to GDS flow')
+        self.run_make_button.setText("Run make")
         # self.run_make_button.setStyleSheet(self.main_window.activeStyle)
         self.run_make_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
         self.run_make_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
@@ -376,7 +378,8 @@ class ConfigWidget(QWidget):
         # self.layout.addWidget(self.openGui_button)
 
         self.run_make_clean_button = QToolButton()
-        self.run_make_clean_button.setText("Run standard clean")
+        self.run_make_clean_button.setToolTip('run clean all generated files')
+        self.run_make_clean_button.setText("Run clean all")
         # self.run_make_clean_button.setStyleSheet(self.main_window.activeStyle)
         self.run_make_clean_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
         self.run_make_clean_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
@@ -389,14 +392,14 @@ class ConfigWidget(QWidget):
         menu_clean = QMenu()
 
         # Create actions
-        step_clean1 = QAction("clean all", self)
+        step_clean1 = QAction("standard clean", self)
         step_clean2 = QAction("clean logs", self)
         step_clean3 = QAction("clean results", self)
         step_clean4 = QAction("clean reports", self)
         step_clean5 = QAction("clean runs", self)
 
 
-        step_clean1.triggered.connect(lambda: self.run_make_step("clean_all"))
+        step_clean1.triggered.connect(lambda: self.run_make_step("clean"))
         step_clean2.triggered.connect(lambda: self.run_make_step("clean_logs"))
         step_clean3.triggered.connect(lambda: self.run_make_step("clean_results"))
         step_clean4.triggered.connect(lambda: self.run_make_step("clean_reports"))
@@ -411,7 +414,7 @@ class ConfigWidget(QWidget):
 
 
         self.run_make_clean_button.setMenu(menu_clean)
-        self.run_make_clean_button.clicked.connect(lambda: self.run_make_step(step="clean"))
+        self.run_make_clean_button.clicked.connect(lambda: self.run_make_step(step="clean_all"))
         self.layout.addWidget(self.run_make_clean_button)
         
         # Edit File Area
@@ -621,16 +624,15 @@ class ConfigWidget(QWidget):
         # self.log("Run Make button clicked")
         if self.is_ubuntu():
             # subprocess.Popen(["gnome-terminal", "--", "bash", "-c", "make"])
+            temp = f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}'
             if self.imported_design and self.pdk:
-                temp = f'\nMAKE\nDesign: {self.imported_design}\n PDK: {self.pdk}'
                 self.main_window.log(temp)
-                self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
-                self.log("Running make...")
+                self.srun(f"cd .. && cd flow && make DESIGN_CONFIG=./designs/{self.pdk}/{self.imported_design}/config.mk {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"')
             else:
                 # self.log("SELECT DESIGN AND PDK FIRST")
                 self.main_window.log('\nDEFAULT MAKE')
-                self.srun('make '+step) 
-            self.log(f'\nmake {step}\n')
+                self.srun(f"cd .. && cd flow && make {step}"+f' && cd .. && cd OpenROAD_HelperGUI;echo "{temp}"') 
+            self.log(f"Running make {step}...")
         else:
             self.log("NOT UBUNTU")
 
