@@ -102,7 +102,7 @@ class SettingsWindow(QDialog):
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
         # self.parent().log(f"cd .. && {command}")
         # self.parent().log("\nRESTART APP AFTER UPDATING...\n")
-        self.srun(f"cd .. && {command} && echo '' && echo '' && echo '<span style=\"color:yellow;font-size: 20pt; font-weight: bold;\">RESTART APP</span>'")
+        self.srun(f"cd .. && {command} && echo '' && echo '' && echo '<span style=\"color:yellow;font-size: 20pt; font-weight: bold;\">'RESTART APP'")
         # self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
         # self.parent().restart_app()
 
@@ -645,7 +645,7 @@ class ConfigWidget(QWidget):
 
     def openGui(self):
         if self.is_ubuntu():
-            self.srun('make gui_final')
+            self.srun('cd .. && cd flow && make gui_final && cd .. && cd OpenROAD_HelperGUI')
             self.log("Opening OpenROAD GUI")
         else:
             self.log("NOT UBUNTU")
