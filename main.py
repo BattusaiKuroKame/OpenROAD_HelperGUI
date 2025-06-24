@@ -97,9 +97,9 @@ class SettingsWindow(QDialog):
 
         command = "rm -rf OpenROAD_HelperGUI && git clone https://github.com/BattusaiKuroKame/OpenROAD_HelperGUI.git"
         # self.parent().log(f"cd .. && {command}")
-        self.parent().log("\nRESTART APP AFTER UPDATING...\n")
-        self.srun(f"cd .. && {command}")
-        self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
+        # self.parent().log("\nRESTART APP AFTER UPDATING...\n")
+        self.srun(f"cd .. && {command} && echo '' && echo '' && echo 'RESTART APP'")
+        # self.parent().log("\nUpdate Command"+"\n"+command +"\n\nRun this command in the 'OpenROAD-flow-scripts/' Directory")
         # self.parent().restart_app()
 
 
