@@ -376,7 +376,7 @@ class ConfigWidget(QWidget):
         # self.layout.addWidget(self.openGui_button)
 
         self.run_make_clean_button = QToolButton()
-        self.run_make_clean_button.setText("Run All make steps")
+        self.run_make_clean_button.setText("Run clean_all steps")
         # self.run_make_clean_button.setStyleSheet(self.main_window.activeStyle)
         self.run_make_clean_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
         self.run_make_clean_button.setAutoRaise(False)  # Important: makes it look more like QPushButton
@@ -389,11 +389,11 @@ class ConfigWidget(QWidget):
         menu_clean = QMenu()
 
         # Create actions
-        step_clean1 = QAction("Synthesis", self)
-        step_clean2 = QAction("Floorplanning", self)
-        step_clean3 = QAction("Placement", self)
-        step_clean4 = QAction("CTS (Clock Tree)", self)
-        step_clean5 = QAction("Routing", self)
+        step_clean1 = QAction("clean all", self)
+        step_clean2 = QAction("clean logs", self)
+        step_clean3 = QAction("clean results", self)
+        step_clean4 = QAction("clean reports", self)
+        step_clean5 = QAction("clean runs", self)
 
 
         step_clean1.triggered.connect(lambda: self.run_make_step("clean_all"))
@@ -411,7 +411,7 @@ class ConfigWidget(QWidget):
 
 
         self.run_make_clean_button.setMenu(menu_clean)
-        self.run_make_clean_button.clicked.connect(lambda: self.run_make_step(step=""))
+        self.run_make_clean_button.clicked.connect(lambda: self.run_make_step(step="clean"))
         self.layout.addWidget(self.run_make_clean_button)
         
         # Edit File Area
